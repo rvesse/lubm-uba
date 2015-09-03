@@ -24,6 +24,7 @@
   </properties>
 
   <build>
+    <finalName>lubm-uba</finalName>
     <plugins>
       <!-- Compiler Plugin -->
       <plugin>
