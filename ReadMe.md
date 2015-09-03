@@ -5,6 +5,7 @@ Data Generator for the LUBM Benchmark, this is basically the official code for t
 - `generate.sh` script for launching
 - `pom.xml` and changed directory structure to be able to build with Maven
 - Added `-out <dir>` option to control where generated data files are written
+- Bug fix to use OS specific file separator
 
 ## Usage
 
