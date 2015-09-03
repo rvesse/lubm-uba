@@ -1,0 +1,62 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.rvesse.lubm</groupId>
+  <artifactId>uba</artifactId>
+  <version>1.7.0</version>
+  <name>LUBM - UBA</name>
+  <description>Lehigh University Benchmark (LUBM) data generator</description>
+  <url>http://swat.cse.lehigh.edu/projects/lubm/</url>
+  <packaging>jar</packaging>
+
+  <properties>
+    <!-- Build properties -->
+    <jdk.source>1.5</jdk.source>
+    <jdk.target>1.5</jdk.target>
+    <jdk.minimum>1.5</jdk.minimum>
+
+    <!-- Plugin versions -->
+    <plugin.compiler.version>3.2</plugin.compiler.version>
+    <plugin.source.version>2.4</plugin.source.version>
+    <plugin.javadoc.version>2.10.1</plugin.javadoc.version>
+    <plugin.enforcer.version>1.4</plugin.enforcer.version>
+    <plugin.shade.version>2.3</plugin.shade.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <!-- Compiler Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${plugin.compiler.version}</version>
+        <configuration>
+          <source>${jdk.source}</source>
+          <target>${jdk.target}</target>
+        </configuration>
+      </plugin>
+
+      <!-- Enforcer Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${plugin.enforcer.version}</version>
+        <executions>
+          <execution>
+            <id>enforce-versions</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireJavaVersion>
+                  <version>${jdk.minimum}</version>
+                </requireJavaVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>
