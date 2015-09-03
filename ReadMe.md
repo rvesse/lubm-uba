@@ -25,4 +25,4 @@ For more information about the benchmark, visit its [homepage](http://www.lehigh
 
 ### This Repository
 
-Please file issues in this GitHub repository if you have issues
+You can file issues against this repository however this is only a convenience repository to provide a usable maven build of the data generator and you should not expect changes or fixes to the code to happen here.
