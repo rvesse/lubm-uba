@@ -367,6 +367,8 @@ public class Generator {
   private int startIndex_;
   /** log writer */
   private PrintStream log_ = null;
+  
+  private File outputDir = null;
 
   /**
    * main method
@@ -376,6 +378,7 @@ public class Generator {
     int univNum = 1, startIndex = 0, seed = 0;
     boolean daml = false;
     String ontology = null;
+    String workDir = null;
 
     try {
       String arg;
@@ -423,6 +426,13 @@ public class Generator {
           else
             throw new Exception();
         }
+        else if (arg.equals("-out")) {
+            if (i < args.length) {
+                arg = args[i++];
+                workDir = arg;
+            } else
+                throw new Exception();
+        }
         else
           throw new Exception();
       }
@@ -434,6 +444,8 @@ public class Generator {
         System.err.println("ontology url is requested!");
         throw new Exception();
       }
+      
+      new Generator().start(univNum, startIndex, seed, daml, ontology, workDir);
     }
     catch (Exception e) {
       System.err.println("Usage: generate.sh \n" +
@@ -443,11 +455,10 @@ public class Generator {
                          ")>]\n" +
                          "\t[-seed <seed(0~" + Integer.MAX_VALUE + ")>]\n" +
                          "\t[-daml]\n" +
+                         "\t[-out <directory>]\n" +
                          "\t-onto <univ-bench ontology url>");
-      System.exit(0);
+      System.exit(1);
     }
-
-    new Generator().start(univNum, startIndex, seed, daml, ontology);
   }
 
   /**
@@ -480,7 +491,7 @@ public class Generator {
    * @param ontology Ontology url.
    */
   public void start(int univNum, int startIndex, int seed, boolean daml,
-                    String ontology) {
+                    String ontology, String workDir) {
     this.ontology = ontology;
 
     isDaml_ = daml;
@@ -493,6 +504,14 @@ public class Generator {
     baseSeed_ = seed;
     instances_[CS_C_UNIV].num = univNum;
     instances_[CS_C_UNIV].count = startIndex;
+    outputDir = workDir != null ? new File(workDir) : new File(".");
+    outputDir = outputDir.getAbsoluteFile();
+    if (!outputDir.exists()) {
+        if (!outputDir.mkdirs()) {
+            throw new IllegalArgumentException(String.format("Unable to create requested output directory %s", outputDir));
+        }
+    }
+    
     _generate();
     System.out.println("See log.txt for more details.");
   }
@@ -645,9 +664,15 @@ public class Generator {
    * NOTE: Use univIndex instead of instances[CS_C_UNIV].count till generateASection(CS_C_UNIV, ) is invoked.
    */
   private void _generateDept(int univIndex, int index) {
-    String fileName = System.getProperty("user.dir") + System.getProperty("file.separator") +
-        _getName(CS_C_UNIV, univIndex) + INDEX_DELIMITER + index + _getFileSuffix();
-    writer_.startFile(fileName);
+      StringBuilder fileName = new StringBuilder();
+      fileName.append(outputDir.getAbsolutePath());
+      if (fileName.charAt(fileName.length() - 1) != File.separatorChar) 
+          fileName.append(File.separatorChar);
+      fileName.append(_getName(CS_C_UNIV, univIndex));
+      fileName.append(INDEX_DELIMITER);
+      fileName.append(index);
+      fileName.append(_getFileSuffix());
+    writer_.startFile(fileName.toString());
 
     //reset
     _setInstanceInfo();
