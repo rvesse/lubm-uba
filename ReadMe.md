@@ -1,6 +1,10 @@
 # Univ-Bench Artificial Data Generator (UBA)
  
-Data Generator for the LUBM Benchmark
+Data Generator for the LUBM Benchmark, this is basically the official code for the generator with some minor tweaks:
+
+- `generate.sh` script for launching
+- `pom.xml` and changed directory structure to be able to build with Maven
+- Added `-out <dir>` option to control where generated data files are written
 
 ## Usage
 
@@ -9,7 +13,6 @@ Data Generator for the LUBM Benchmark
 Running without any `options` will print the usage summary
 
 Note that the default ontology URL usually passed to the `-onto` argument is `http://swat.cse.lehigh.edu/onto/univ-bench.owl`
-
 
 ## Copyright
 
