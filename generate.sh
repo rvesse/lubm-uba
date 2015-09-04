@@ -1,7 +1,20 @@
 #!/bin/bash
 
 # Locate ourselves, will fail on BSD/OS X because they don't have readlink -f
-SCRIPT=$(readlink -f $0)
+case "${OSTYPE}" in
+  bsd*|darwin*)
+    # BSD/OS X doesn't support readlink -f
+    SCRIPT=$0
+    while [ -L "${SCRIPT}" ];
+    do
+      SCRIPT=$(readlink "${SCRIPT}")
+    done
+    ;;
+  *)
+    # Can use readlink -f on standard Linux
+    SCRIPT=$(readlink -f $0)
+    ;;
+esac
 SCRIPT_DIR=$(dirname "${SCRIPT}")
 
 # Check for the script
@@ -11,4 +24,4 @@ if [ ! -e "${SCRIPT_DIR}/target/lubm-uba.jar" ]; then
 fi
 
 # Exec the Java class
-exec java ${JAVA_OPTS} -cp target/lubm-uba.jar edu.lehigh.swat.bench.uba.Generator $*
+exec java ${JAVA_OPTS} -jar target/lubm-uba.jar $*

@@ -4,20 +4,27 @@ Data Generator for the LUBM Benchmark, this is basically the official code for t
 
 - `generate.sh` script for launching
 - `pom.xml` and changed directory structure to be able to build with Maven
-- Added `-out <dir>` option to control where generated data files are written
+- Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
+- Use a proper command line parsing library that provides meaningful built in help and parsing errors
 - Bug fix to use OS specific file separator
 
 ## Usage
 
     > ./generate.sh options
    
-Running without any `options` will print the usage summary
+Run the following to see the usage summary:
 
-Note that the default ontology URL usually passed to the `-onto` argument is `http://swat.cse.lehigh.edu/onto/univ-bench.owl`
+    > ./generate.sh --help
 
 ## Copyright
 
+### Original Code
+
 The Semantic Web and Agent Technologies (SWAT) Lab, CSE Department, Lehigh University
+
+### Modified Code
+
+Rob Vesse
   
 ## Contact
 
@@ -29,4 +36,4 @@ For more information about the benchmark, visit its [homepage](http://www.lehigh
 
 ### This Repository
 
-You can file issues against this repository however this is only a convenience repository to provide a usable maven build of the data generator and you should not expect changes or fixes to the code to happen here.
+You can file issues against this repository if they are specific to this version of the data generator.  While the generator here may differ from the original any changes have been done such that the data generated remains identical.

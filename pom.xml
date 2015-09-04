@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.rvesse.lubm</groupId>
   <artifactId>uba</artifactId>
-  <version>1.7.0</version>
+  <version>1.8.0</version>
   <name>LUBM - UBA</name>
   <description>Lehigh University Benchmark (LUBM) data generator</description>
   <url>http://swat.cse.lehigh.edu/projects/lubm/</url>
@@ -15,6 +15,9 @@
     <jdk.target>1.5</jdk.target>
     <jdk.minimum>1.5</jdk.minimum>
 
+    <!-- Dependency Versions -->
+    <dependency.airline.version>1.0.1</dependency.airline.version>
+
     <!-- Plugin versions -->
     <plugin.compiler.version>3.2</plugin.compiler.version>
     <plugin.source.version>2.4</plugin.source.version>
@@ -22,6 +25,14 @@
     <plugin.enforcer.version>1.4</plugin.enforcer.version>
     <plugin.shade.version>2.3</plugin.shade.version>
   </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.github.rvesse</groupId>
+      <artifactId>airline</artifactId>
+      <version>${dependency.airline.version}</version>
+    </dependency>
+  </dependencies>
 
   <build>
     <finalName>lubm-uba</finalName>
@@ -55,6 +66,29 @@
                 </requireJavaVersion>
               </rules>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Shade Plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>2.4.1</version>
+        <configuration>
+          <transformers>
+            <transformer
+              implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>edu.lehigh.swat.bench.uba.Launcher</mainClass>
+            </transformer>
+          </transformers>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>
