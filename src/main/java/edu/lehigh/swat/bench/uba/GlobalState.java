@@ -1,6 +1,8 @@
 package edu.lehigh.swat.bench.uba;
 
 import java.io.File;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import edu.lehigh.swat.bench.uba.model.Ontology;
@@ -23,10 +25,11 @@ public class GlobalState {
     private final AtomicLong[] totalPropertiesGenerated;
 
     private final WriterType writerType;
-
     private final File outputDir;
     
-    public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir) {
+    private final ExecutorService executorService;
+    
+    public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir, int threads) {
         this.numUniversities = univNum;
         this.baseSeed = baseSeed;
         this.startIndex = startIndex;
@@ -41,6 +44,12 @@ public class GlobalState {
         this.totalPropertiesGenerated = new AtomicLong[Ontology.PROP_NUM];
         for (int i = 0; i < Ontology.PROP_NUM; i++) {
             this.totalPropertiesGenerated[i] = new AtomicLong(0l);
+        }
+        
+        if (threads <= 1) {
+            this.executorService = Executors.newSingleThreadExecutor();
+        } else {
+            this.executorService = Executors.newFixedThreadPool(threads);
         }
     }
 
@@ -66,6 +75,10 @@ public class GlobalState {
     
     public File getOutputDirectory() {
         return this.outputDir;
+    }
+    
+    public ExecutorService getExecutor() {
+        return this.executorService;
     }
     
     public void incrementTotalInstances(int classType) {

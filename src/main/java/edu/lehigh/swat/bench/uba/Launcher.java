@@ -56,6 +56,10 @@ public class Launcher {
                     + PatternLayout.TTCC_CONVERSION_PATTERN + ")")
     private String logPattern = null;
 
+    @Option(name = { "-t",
+            "--threads" }, title = "NumThreads", arity = 1, description = "Sets the number of threads to use for data generation (default 1) which can speed up generating data for larger numbers of universities")
+    private int threads = 1;
+
     @Inject
     private HelpOption help;
 
@@ -85,8 +89,8 @@ public class Launcher {
 
             // Run the generator
             Generator generator = new Generator();
-            generator.start(launcher.univNum, launcher.startIndex, launcher.seed, launcher.daml ? WriterType.DAML : WriterType.OWL, launcher.ontology,
-                    launcher.workDir);
+            generator.start(launcher.univNum, launcher.startIndex, launcher.seed,
+                    launcher.daml ? WriterType.DAML : WriterType.OWL, launcher.ontology, launcher.workDir, launcher.threads);
 
         } catch (ParseException e) {
             System.err.println(e.getMessage());

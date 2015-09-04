@@ -59,6 +59,7 @@ public class UniversityState implements GeneratorCallbackTarget {
     private int chair;
 
     private final Writer writer;
+    private boolean completed = false;
 
     public UniversityState(GlobalState state, int index) {
         this.state = state;
@@ -91,6 +92,14 @@ public class UniversityState implements GeneratorCallbackTarget {
         default:
             throw new RuntimeException("Invalid writer type specified");
         }
+    }
+    
+    public boolean hasCompleted() {
+        return this.completed;
+    }
+    
+    public void setComplete() {
+        this.completed = true;
     }
 
     public GlobalState getGlobalState() {
