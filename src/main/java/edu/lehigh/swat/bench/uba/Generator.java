@@ -20,259 +20,22 @@
 package edu.lehigh.swat.bench.uba;
 
 import java.util.*;
+
+import edu.lehigh.swat.bench.uba.model.CourseInfo;
+import edu.lehigh.swat.bench.uba.model.GenerationParameters;
+import edu.lehigh.swat.bench.uba.model.InstanceCount;
+import edu.lehigh.swat.bench.uba.model.Ontology;
+import edu.lehigh.swat.bench.uba.model.PropertyCount;
+import edu.lehigh.swat.bench.uba.model.PublicationInfo;
+import edu.lehigh.swat.bench.uba.model.RaInfo;
+import edu.lehigh.swat.bench.uba.model.TaInfo;
+import edu.lehigh.swat.bench.uba.writers.DamlWriter;
+import edu.lehigh.swat.bench.uba.writers.OwlWriter;
+import edu.lehigh.swat.bench.uba.writers.Writer;
+
 import java.io.*;
 
-public class Generator {
-
-  ///////////////////////////////////////////////////////////////////////////
-  //ontology class information
-  //NOTE: prefix "CS" was used because the predecessor of univ-bench ontology
-  //is called cs ontolgy.
-  ///////////////////////////////////////////////////////////////////////////
-  /** n/a */
-  static final int CS_C_NULL = -1;
-  /** University */
-  static final int CS_C_UNIV = 0;
-  /** Department */
-  static final int CS_C_DEPT = CS_C_UNIV + 1;
-  /** Faculty */
-  static final int CS_C_FACULTY = CS_C_DEPT + 1;
-  /** Professor */
-  static final int CS_C_PROF = CS_C_FACULTY + 1;
-  /** FullProfessor */
-  static final int CS_C_FULLPROF = CS_C_PROF + 1;
-  /** AssociateProfessor */
-  static final int CS_C_ASSOPROF = CS_C_FULLPROF + 1;
-  /** AssistantProfessor */
-  static final int CS_C_ASSTPROF = CS_C_ASSOPROF + 1;
-  /** Lecturer */
-  static final int CS_C_LECTURER = CS_C_ASSTPROF + 1;
-  /** Student */
-  static final int CS_C_STUDENT = CS_C_LECTURER + 1;
-  /** UndergraduateStudent */
-  static final int CS_C_UNDERSTUD = CS_C_STUDENT + 1;
-  /** GraduateStudent */
-  static final int CS_C_GRADSTUD = CS_C_UNDERSTUD + 1;
-  /** TeachingAssistant */
-  static final int CS_C_TA = CS_C_GRADSTUD + 1;
-  /** ResearchAssistant */
-  static final int CS_C_RA = CS_C_TA + 1;
-  /** Course */
-  static final int CS_C_COURSE = CS_C_RA + 1;
-  /** GraduateCourse */
-  static final int CS_C_GRADCOURSE = CS_C_COURSE + 1;
-  /** Publication */
-  static final int CS_C_PUBLICATION = CS_C_GRADCOURSE + 1;
-  /** Chair */
-  static final int CS_C_CHAIR = CS_C_PUBLICATION + 1;
-  /** Research */
-  static final int CS_C_RESEARCH = CS_C_CHAIR + 1;
-  /** ResearchGroup */
-  static final int CS_C_RESEARCHGROUP = CS_C_RESEARCH + 1;
-  /** class information */
-  static final int[][] CLASS_INFO = {
-      /*{instance number if not specified, direct super class}*/
-      //NOTE: the super classes specifed here do not necessarily reflect the entailment of the ontology
-      {2, CS_C_NULL}, //CS_C_UNIV
-      {1, CS_C_NULL}, //CS_C_DEPT
-      {0, CS_C_NULL}, //CS_C_FACULTY
-      {0, CS_C_FACULTY}, //CS_C_PROF
-      {0, CS_C_PROF}, //CS_C_FULLPROF
-      {0, CS_C_PROF}, //CS_C_ASSOPROF
-      {0, CS_C_PROF}, //CS_C_ASSTPROF
-      {0, CS_C_FACULTY}, //CS_C_LECTURER
-      {0, CS_C_NULL}, //CS_C_STUDENT
-      {0, CS_C_STUDENT}, //CS_C_UNDERSTUD
-      {0, CS_C_STUDENT}, //CS_C_GRADSTUD
-      {0, CS_C_NULL}, //CS_C_TA
-      {0, CS_C_NULL}, //CS_C_RA
-      {0, CS_C_NULL}, //CS_C_COURSE, treated as undergrad course here
-      {0, CS_C_NULL}, //CS_C_GRADCOURSE
-      {0, CS_C_NULL}, //CS_C_PUBLICATION
-      {0, CS_C_NULL}, //CS_C_CHAIR
-      {0, CS_C_NULL}, //CS_C_RESEARCH
-      {0, CS_C_NULL} //CS_C_RESEARCHGROUP
-  };
-  /** class name strings */
-  static final String[] CLASS_TOKEN = {
-      "University", //CS_C_UNIV
-      "Department", //CS_C_DEPT
-      "Faculty", //CS_C_FACULTY
-      "Professor", //CS_C_PROF
-      "FullProfessor", //CS_C_FULLPROF
-      "AssociateProfessor", //CS_C_ASSOPROF
-      "AssistantProfessor", //CS_C_ASSTPROF
-      "Lecturer", //CS_C_LECTURER
-      "Student", //CS_C_STUDENT
-      "UndergraduateStudent", //CS_C_UNDERSTUD
-      "GraduateStudent", //CS_C_GRADSTUD
-      "TeachingAssistant", //CS_C_TA
-      "ResearchAssistant", //CS_C_RA
-      "Course", //CS_C_COURSE
-      "GraduateCourse", //CS_C_GRADCOURSE
-      "Publication", //CS_C_PUBLICATION
-      "Chair", //CS_C_CHAIR
-      "Research", //CS_C_RESEARCH
-      "ResearchGroup" //CS_C_RESEARCHGROUP
-  };
-  /** number of classes */
-  static final int CLASS_NUM = CLASS_INFO.length;
-  /** index of instance-number in the elements of array CLASS_INFO */
-  static final int INDEX_NUM = 0;
-  /** index of super-class in the elements of array CLASS_INFO */
-  static final int INDEX_SUPER = 1;
-
-  ///////////////////////////////////////////////////////////////////////////
-  //ontology property information
-  ///////////////////////////////////////////////////////////////////////////
-  /** name */
-  static final int CS_P_NAME = 0;
-  /** takesCourse */
-  static final int CS_P_TAKECOURSE = CS_P_NAME + 1;
-  /** teacherOf */
-  static final int CS_P_TEACHEROF = CS_P_TAKECOURSE + 1;
-  /** undergraduateDegreeFrom */
-  static final int CS_P_UNDERGRADFROM = CS_P_TEACHEROF + 1;
-  /** mastersDegreeFrom */
-  static final int CS_P_GRADFROM = CS_P_UNDERGRADFROM + 1;
-  /** doctoralDegreeFrom */
-  static final int CS_P_DOCFROM = CS_P_GRADFROM + 1;
-  /** advisor */
-  static final int CS_P_ADVISOR = CS_P_DOCFROM + 1;
-  /** memberOf */
-  static final int CS_P_MEMBEROF = CS_P_ADVISOR + 1;
-  /** publicationAuthor */
-  static final int CS_P_PUBLICATIONAUTHOR = CS_P_MEMBEROF + 1;
-  /** headOf */
-  static final int CS_P_HEADOF = CS_P_PUBLICATIONAUTHOR + 1;
-  /** teachingAssistantOf */
-  static final int CS_P_TAOF = CS_P_HEADOF + 1;
-  /** reseachAssistantOf */
-  static final int CS_P_RESEARCHINTEREST = CS_P_TAOF + 1;
-  /** emailAddress */
-  static final int CS_P_EMAIL = CS_P_RESEARCHINTEREST + 1;
-  /** telephone */
-  static final int CS_P_TELEPHONE = CS_P_EMAIL + 1;
-  /** subOrganizationOf */
-  static final int CS_P_SUBORGANIZATIONOF = CS_P_TELEPHONE + 1;
-  /** worksFor */
-  static final int CS_P_WORKSFOR = CS_P_SUBORGANIZATIONOF + 1;
-  /** property name strings */
-  static final String[] PROP_TOKEN = {
-      "name",
-      "takesCourse",
-      "teacherOf",
-      "undergraduateDegreeFrom",
-      "mastersDegreeFrom",
-      "doctoralDegreeFrom",
-      "advisor",
-      "memberOf",
-      "publicationAuthor",
-      "headOf",
-      "teachingAssistantOf",
-      "researchInterest",
-      "emailAddress",
-      "telephone",
-      "subOrganizationOf",
-      "worksFor"
-  };
-  /** number of properties */
-  static final int PROP_NUM = PROP_TOKEN.length;
-
-  ///////////////////////////////////////////////////////////////////////////
-  //restrictions for data generation
-  ///////////////////////////////////////////////////////////////////////////
-  /** size of the pool of the undergraduate courses for one department */
-  private static final int UNDER_COURSE_NUM = 100; //must >= max faculty # * FACULTY_COURSE_MAX
-  /** size of the pool of the graduate courses for one department */
-  private static final int GRAD_COURSE_NUM = 100; //must >= max faculty # * FACULTY_GRADCOURSE_MAX
-  /** size of the pool of universities */
-  private static final int UNIV_NUM = 1000;
-  /** size of the pool of reasearch areas */
-  private static final int RESEARCH_NUM = 30;
-  /** minimum number of departments in a university */
-  private static final int DEPT_MIN = 15;
-  /** maximum number of departments in a university */
-  private static final int DEPT_MAX = 25;
-  //must: DEPT_MAX - DEPT_MIN + 1 <> 2 ^ n
-  /** minimum number of publications of a full professor */
-  private static final int FULLPROF_PUB_MIN = 15;
-  /** maximum number of publications of a full professor */
-  private static final int FULLPROF_PUB_MAX = 20;
-  /** minimum number of publications of an associate professor */
-  private static final int ASSOPROF_PUB_MIN = 10;
-  /** maximum number of publications of an associate professor */
-  private static final int ASSOPROF_PUB_MAX = 18;
-  /** minimum number of publications of an assistant professor */
-  private static final int ASSTPROF_PUB_MIN = 5;
-  /** maximum number of publications of an assistant professor */
-  private static final int ASSTPROF_PUB_MAX = 10;
-  /** minimum number of publications of a graduate student */
-  private static final int GRADSTUD_PUB_MIN = 0;
-  /** maximum number of publications of a graduate student */
-  private static final int GRADSTUD_PUB_MAX = 5;
-  /** minimum number of publications of a lecturer */
-  private static final int LEC_PUB_MIN = 0;
-  /** maximum number of publications of a lecturer */
-  private static final int LEC_PUB_MAX = 5;
-  /** minimum number of courses taught by a faculty */
-  private static final int FACULTY_COURSE_MIN = 1;
-  /** maximum number of courses taught by a faculty */
-  private static final int FACULTY_COURSE_MAX = 2;
-  /** minimum number of graduate courses taught by a faculty */
-  private static final int FACULTY_GRADCOURSE_MIN = 1;
-  /** maximum number of graduate courses taught by a faculty */
-  private static final int FACULTY_GRADCOURSE_MAX = 2;
-  /** minimum number of courses taken by a undergraduate student */
-  private static final int UNDERSTUD_COURSE_MIN = 2;
-  /** maximum number of courses taken by a undergraduate student */
-  private static final int UNDERSTUD_COURSE_MAX = 4;
-  /** minimum number of courses taken by a graduate student */
-  private static final int GRADSTUD_COURSE_MIN = 1;
-  /** maximum number of courses taken by a graduate student */
-  private static final int GRADSTUD_COURSE_MAX = 3;
-  /** minimum number of research groups in a department */
-  private static final int RESEARCHGROUP_MIN = 10;
-  /** maximum number of research groups in a department */
-  private static final int RESEARCHGROUP_MAX = 20;
-  //faculty number: 30-42
-  /** minimum number of full professors in a department*/
-  private static final int FULLPROF_MIN = 7;
-  /** maximum number of full professors in a department*/
-  private static final int FULLPROF_MAX = 10;
-  /** minimum number of associate professors in a department*/
-  private static final int ASSOPROF_MIN = 10;
-  /** maximum number of associate professors in a department*/
-  private static final int ASSOPROF_MAX = 14;
-  /** minimum number of assistant professors in a department*/
-  private static final int ASSTPROF_MIN = 8;
-  /** maximum number of assistant professors in a department*/
-  private static final int ASSTPROF_MAX = 11;
-  /** minimum number of lecturers in a department*/
-  private static final int LEC_MIN = 5;
-  /** maximum number of lecturers in a department*/
-  private static final int LEC_MAX = 7;
-  /** minimum ratio of undergraduate students to faculties in a department*/
-  private static final int R_UNDERSTUD_FACULTY_MIN = 8;
-  /** maximum ratio of undergraduate students to faculties in a department*/
-  private static final int R_UNDERSTUD_FACULTY_MAX = 14;
-  /** minimum ratio of graduate students to faculties in a department*/
-  private static final int R_GRADSTUD_FACULTY_MIN = 3;
-  /** maximum ratio of graduate students to faculties in a department*/
-  private static final int R_GRADSTUD_FACULTY_MAX = 4;
-  //MUST: FACULTY_COURSE_MIN >= R_GRADSTUD_FACULTY_MAX / R_GRADSTUD_TA_MIN;
-  /** minimum ratio of graduate students to TA in a department */
-  private static final int R_GRADSTUD_TA_MIN = 4;
-  /** maximum ratio of graduate students to TA in a department */
-  private static final int R_GRADSTUD_TA_MAX = 5;
-  /** minimum ratio of graduate students to RA in a department */
-  private static final int R_GRADSTUD_RA_MIN = 3;
-  /** maximum ratio of graduate students to RA in a department */
-  private static final int R_GRADSTUD_RA_MAX = 4;
-  /** average ratio of undergraduate students to undergraduate student advising professors */
-  private static final int R_UNDERSTUD_ADVISOR = 5;
-  /** average ratio of graduate students to graduate student advising professors */
-  private static final int R_GRADSTUD_ADVISOR = 1;
+public class Generator implements GeneratorCallbackTarget {
 
   /** delimiter between different parts in an id string*/
   private static final char ID_DELIMITER = '/';
@@ -280,60 +43,6 @@ public class Generator {
   private static final char INDEX_DELIMITER = '_';
   /** name of the log file */
   private static final String LOG_FILE = "log.txt";
-
-  /** instance count of a class */
-  private class InstanceCount {
-    /** instance number within one department */
-    public int num = 0;
-    /** total instance num including sub-classes within one department */
-    public int total = 0;
-    /** index of the current instance within the current department */
-    public int count = 0;
-    /** total number so far within the current department */
-    public int logNum = 0;
-    /** total number so far */
-    public long logTotal = 0l;
-  }
-
-  /** instance count of a property */
-  private class PropertyCount {
-    /** total number so far within the current department */
-    public int logNum = 0;
-    /** total number so far */
-    public long logTotal = 0l;
-  }
-
-  /** information a course instance */
-  private class CourseInfo {
-    /** index of the faculty who teaches this course */
-    public int indexInFaculty = 0;
-    /** index of this course */
-    public int globalIndex = 0;
-  }
-
-  /** information of an RA instance */
-  private class RaInfo {
-    /** index of this RA in the graduate students */
-    public int indexInGradStud = 0;
-  }
-
-  /** information of a TA instance */
-  private class TaInfo {
-    /** index of this TA in the graduate students */
-    public int indexInGradStud = 0;
-    /** index of the course which this TA assists */
-    public int indexInCourse = 0; //local index in courses
-  }
-
-  /** informaiton of a publication instance */
-  private class PublicationInfo {
-    /** id */
-    public String id;
-    /** name */
-    public String name;
-    /** list of authors */
-    public ArrayList<String> authors;
-  }
 
   /** univ-bench ontology url */
   String ontology;
@@ -374,12 +83,12 @@ public class Generator {
    * constructor
    */
   public Generator() {
-    instances_ = new InstanceCount[CLASS_NUM];
-    for (int i = 0; i < CLASS_NUM; i++) {
+    instances_ = new InstanceCount[Ontology.CLASS_NUM];
+    for (int i = 0; i < Ontology.CLASS_NUM; i++) {
       instances_[i] = new InstanceCount();
     }
-    properties_ = new PropertyCount[PROP_NUM];
-    for (int i = 0; i < PROP_NUM; i++) {
+    properties_ = new PropertyCount[Ontology.PROP_NUM];
+    for (int i = 0; i < Ontology.PROP_NUM; i++) {
       properties_[i] = new PropertyCount();
     }
 
@@ -405,14 +114,14 @@ public class Generator {
 
     isDaml_ = daml;
     if (daml)
-      writer_ = new DamlWriter(this);
+      writer_ = new DamlWriter(this, ontology);
     else
-      writer_ = new OwlWriter(this);
+      writer_ = new OwlWriter(this, ontology);
 
     startIndex_ = startIndex;
     baseSeed_ = seed;
-    instances_[CS_C_UNIV].num = univNum;
-    instances_[CS_C_UNIV].count = startIndex;
+    instances_[Ontology.CS_C_UNIV].num = univNum;
+    instances_[Ontology.CS_C_UNIV].count = startIndex;
     outputDir = workDir != null ? new File(workDir) : new File(".");
     outputDir = outputDir.getAbsoluteFile();
     if (!outputDir.exists()) {
@@ -428,37 +137,21 @@ public class Generator {
   ///////////////////////////////////////////////////////////////////////////
   //writer callbacks
 
-  /**
-   * Callback by the writer when it starts an instance section.
-   * @param classType Type of the instance.
-   */
-  void startSectionCB(int classType) {
+  public void startSectionCB(int classType) {
     instances_[classType].logNum++;
     instances_[classType].logTotal++;
   }
 
-  /**
-   * Callback by the writer when it starts an instance section identified by an rdf:about attribute.
-   * @param classType Type of the instance.
-   */
-  void startAboutSectionCB(int classType) {
+  public void startAboutSectionCB(int classType) {
     startSectionCB(classType);
   }
 
-  /**
-   * Callback by the writer when it adds a property statement.
-   * @param property Type of the property.
-   */
-  void addPropertyCB(int property) {
+  public void addPropertyCB(int property) {
     properties_[property].logNum++;
     properties_[property].logTotal++;
   }
 
-  /**
-   * Callback by the writer when it adds a property statement whose value is an individual.
-   * @param classType Type of the individual.
-   */
-  void addValueClassCB(int classType) {
+  public void addValueClassCB(int classType) {
     instances_[classType].logNum++;
     instances_[classType].logTotal++;
   }
@@ -471,58 +164,58 @@ public class Generator {
   private void _setInstanceInfo() {
     int subClass, superClass;
 
-    for (int i = 0; i < CLASS_NUM; i++) {
+    for (int i = 0; i < Ontology.CLASS_NUM; i++) {
       switch (i) {
-        case CS_C_UNIV:
+        case Ontology.CS_C_UNIV:
           break;
-        case CS_C_DEPT:
+        case Ontology.CS_C_DEPT:
           break;
-        case CS_C_FULLPROF:
-          instances_[i].num = _getRandomFromRange(FULLPROF_MIN, FULLPROF_MAX);
+        case Ontology.CS_C_FULLPROF:
+          instances_[i].num = _getRandomFromRange(GenerationParameters.FULLPROF_MIN, GenerationParameters.FULLPROF_MAX);
           break;
-        case CS_C_ASSOPROF:
-          instances_[i].num = _getRandomFromRange(ASSOPROF_MIN, ASSOPROF_MAX);
+        case Ontology.CS_C_ASSOPROF:
+          instances_[i].num = _getRandomFromRange(GenerationParameters.ASSOPROF_MIN, GenerationParameters.ASSOPROF_MAX);
           break;
-        case CS_C_ASSTPROF:
-          instances_[i].num = _getRandomFromRange(ASSTPROF_MIN, ASSTPROF_MAX);
+        case Ontology.CS_C_ASSTPROF:
+          instances_[i].num = _getRandomFromRange(GenerationParameters.ASSTPROF_MIN, GenerationParameters.ASSTPROF_MAX);
           break;
-        case CS_C_LECTURER:
-          instances_[i].num = _getRandomFromRange(LEC_MIN, LEC_MAX);
+        case Ontology.CS_C_LECTURER:
+          instances_[i].num = _getRandomFromRange(GenerationParameters.LEC_MIN, GenerationParameters.LEC_MAX);
           break;
-        case CS_C_UNDERSTUD:
-          instances_[i].num = _getRandomFromRange(R_UNDERSTUD_FACULTY_MIN *
-                                         instances_[CS_C_FACULTY].total,
-                                         R_UNDERSTUD_FACULTY_MAX *
-                                         instances_[CS_C_FACULTY].total);
+        case Ontology.CS_C_UNDERSTUD:
+          instances_[i].num = _getRandomFromRange(GenerationParameters.R_UNDERSTUD_FACULTY_MIN *
+                                         instances_[Ontology.CS_C_FACULTY].total,
+                                         GenerationParameters.R_UNDERSTUD_FACULTY_MAX *
+                                         instances_[Ontology.CS_C_FACULTY].total);
           break;
-        case CS_C_GRADSTUD:
-          instances_[i].num = _getRandomFromRange(R_GRADSTUD_FACULTY_MIN *
-                                         instances_[CS_C_FACULTY].total,
-                                         R_GRADSTUD_FACULTY_MAX *
-                                         instances_[CS_C_FACULTY].total);
+        case Ontology.CS_C_GRADSTUD:
+          instances_[i].num = _getRandomFromRange(GenerationParameters.R_GRADSTUD_FACULTY_MIN *
+                                         instances_[Ontology.CS_C_FACULTY].total,
+                                         GenerationParameters.R_GRADSTUD_FACULTY_MAX *
+                                         instances_[Ontology.CS_C_FACULTY].total);
           break;
-        case CS_C_TA:
-          instances_[i].num = _getRandomFromRange(instances_[CS_C_GRADSTUD].total /
-                                         R_GRADSTUD_TA_MAX,
-                                         instances_[CS_C_GRADSTUD].total /
-                                         R_GRADSTUD_TA_MIN);
+        case Ontology.CS_C_TA:
+          instances_[i].num = _getRandomFromRange(instances_[Ontology.CS_C_GRADSTUD].total /
+                                         GenerationParameters.R_GRADSTUD_TA_MAX,
+                                         instances_[Ontology.CS_C_GRADSTUD].total /
+                                         GenerationParameters.R_GRADSTUD_TA_MIN);
           break;
-        case CS_C_RA:
-          instances_[i].num = _getRandomFromRange(instances_[CS_C_GRADSTUD].total /
-                                         R_GRADSTUD_RA_MAX,
-                                         instances_[CS_C_GRADSTUD].total /
-                                         R_GRADSTUD_RA_MIN);
+        case Ontology.CS_C_RA:
+          instances_[i].num = _getRandomFromRange(instances_[Ontology.CS_C_GRADSTUD].total /
+                                         GenerationParameters.R_GRADSTUD_RA_MAX,
+                                         instances_[Ontology.CS_C_GRADSTUD].total /
+                                         GenerationParameters.R_GRADSTUD_RA_MIN);
           break;
-        case CS_C_RESEARCHGROUP:
-          instances_[i].num = _getRandomFromRange(RESEARCHGROUP_MIN, RESEARCHGROUP_MAX);
+        case Ontology.CS_C_RESEARCHGROUP:
+          instances_[i].num = _getRandomFromRange(GenerationParameters.RESEARCHGROUP_MIN, GenerationParameters.RESEARCHGROUP_MAX);
           break;
         default:
-          instances_[i].num = CLASS_INFO[i][INDEX_NUM];
+          instances_[i].num = Ontology.CLASS_INFO[i][Ontology.INDEX_NUM];
           break;
       }
       instances_[i].total = instances_[i].num;
       subClass = i;
-      while ( (superClass = CLASS_INFO[subClass][INDEX_SUPER]) != CS_C_NULL) {
+      while ( (superClass = Ontology.CLASS_INFO[subClass][Ontology.INDEX_SUPER]) != Ontology.CS_C_NULL) {
         instances_[superClass].total += instances_[i].num;
         subClass = superClass;
       }
@@ -536,7 +229,7 @@ public class Generator {
       log_ = new PrintStream(new FileOutputStream(System.getProperty("user.dir") +
                                                  System.getProperty("file.separator") + LOG_FILE));
       writer_.start();
-      for (int i = 0; i < instances_[CS_C_UNIV].num; i++) {
+      for (int i = 0; i < instances_[Ontology.CS_C_UNIV].num; i++) {
         _generateUniv(i + startIndex_);
       }
       writer_.end();
@@ -558,10 +251,10 @@ public class Generator {
     random_.setSeed(seed_);
 
     //determine department number
-    instances_[CS_C_DEPT].num = _getRandomFromRange(DEPT_MIN, DEPT_MAX);
-    instances_[CS_C_DEPT].count = 0;
+    instances_[Ontology.CS_C_DEPT].num = _getRandomFromRange(GenerationParameters.DEPT_MIN, GenerationParameters.DEPT_MAX);
+    instances_[Ontology.CS_C_DEPT].count = 0;
     //generate departments
-    for (int i = 0; i < instances_[CS_C_DEPT].num; i++) {
+    for (int i = 0; i < instances_[Ontology.CS_C_DEPT].num; i++) {
       _generateDept(index, i);
     }
   }
@@ -577,7 +270,7 @@ public class Generator {
       fileName.append(outputDir.getAbsolutePath());
       if (fileName.charAt(fileName.length() - 1) != File.separatorChar) 
           fileName.append(File.separatorChar);
-      fileName.append(_getName(CS_C_UNIV, univIndex));
+      fileName.append(_getName(Ontology.CS_C_UNIV, univIndex));
       fileName.append(INDEX_DELIMITER);
       fileName.append(index);
       fileName.append(_getFileSuffix());
@@ -589,28 +282,28 @@ public class Generator {
     gradCourses_.clear();
     remainingUnderCourses_.clear();
     remainingGradCourses_.clear();
-    for (int i = 0; i < UNDER_COURSE_NUM; i++) {
+    for (int i = 0; i < GenerationParameters.UNDER_COURSE_NUM; i++) {
       remainingUnderCourses_.add(new Integer(i));
     }
-    for (int i = 0; i < GRAD_COURSE_NUM; i++) {
+    for (int i = 0; i < GenerationParameters.GRAD_COURSE_NUM; i++) {
       remainingGradCourses_.add(new Integer(i));
     }
     publications_.clear();
-    for (int i = 0; i < CLASS_NUM; i++) {
+    for (int i = 0; i < Ontology.CLASS_NUM; i++) {
       instances_[i].logNum = 0;
     }
-    for (int i = 0; i < PROP_NUM; i++) {
+    for (int i = 0; i < Ontology.PROP_NUM; i++) {
       properties_[i].logNum = 0;
     }
 
     //decide the chair
-    chair_ = random_.nextInt(instances_[CS_C_FULLPROF].total);
+    chair_ = random_.nextInt(instances_[Ontology.CS_C_FULLPROF].total);
 
     if (index == 0) {
-      _generateASection(CS_C_UNIV, univIndex);
+      _generateASection(Ontology.CS_C_UNIV, univIndex);
     }
-    _generateASection(CS_C_DEPT, index);
-    for (int i = CS_C_DEPT + 1; i < CLASS_NUM; i++) {
+    _generateASection(Ontology.CS_C_DEPT, index);
+    for (int i = Ontology.CS_C_DEPT + 1; i < Ontology.CLASS_NUM; i++) {
       instances_[i].count = 0;
       for (int j = 0; j < instances_[i].num; j++) {
         _generateASection(i, j);
@@ -644,43 +337,43 @@ public class Generator {
     _updateCount(classType);
 
     switch (classType) {
-      case CS_C_UNIV:
+      case Ontology.CS_C_UNIV:
         _generateAUniv(index);
         break;
-      case CS_C_DEPT:
+      case Ontology.CS_C_DEPT:
         _generateADept(index);
         break;
-      case CS_C_FACULTY:
+      case Ontology.CS_C_FACULTY:
         _generateAFaculty(index);
         break;
-      case CS_C_PROF:
+      case Ontology.CS_C_PROF:
         _generateAProf(index);
         break;
-      case CS_C_FULLPROF:
+      case Ontology.CS_C_FULLPROF:
         _generateAFullProf(index);
         break;
-      case CS_C_ASSOPROF:
+      case Ontology.CS_C_ASSOPROF:
         _generateAnAssociateProfessor(index);
         break;
-      case CS_C_ASSTPROF:
+      case Ontology.CS_C_ASSTPROF:
         _generateAnAssistantProfessor(index);
         break;
-      case CS_C_LECTURER:
+      case Ontology.CS_C_LECTURER:
         _generateALecturer(index);
         break;
-      case CS_C_UNDERSTUD:
+      case Ontology.CS_C_UNDERSTUD:
         _generateAnUndergraduateStudent(index);
         break;
-      case CS_C_GRADSTUD:
+      case Ontology.CS_C_GRADSTUD:
         _generateAGradudateStudent(index);
         break;
-      case CS_C_COURSE:
+      case Ontology.CS_C_COURSE:
         _generateACourse(index);
         break;
-      case CS_C_GRADCOURSE:
+      case Ontology.CS_C_GRADCOURSE:
         _generateAGraduateCourse(index);
         break;
-      case CS_C_RESEARCHGROUP:
+      case Ontology.CS_C_RESEARCHGROUP:
         _generateAResearchGroup(index);
         break;
       default:
@@ -693,9 +386,9 @@ public class Generator {
    * @param index Index of the instance.
    */
   private void _generateAUniv(int index) {
-    writer_.startSection(CS_C_UNIV, _getId(CS_C_UNIV, index));
-    writer_.addProperty(CS_P_NAME, _getRelativeName(CS_C_UNIV, index), false);
-    writer_.endSection(CS_C_UNIV);
+    writer_.startSection(Ontology.CS_C_UNIV, _getId(Ontology.CS_C_UNIV, index));
+    writer_.addProperty(Ontology.CS_P_NAME, _getRelativeName(Ontology.CS_C_UNIV, index), false);
+    writer_.endSection(Ontology.CS_C_UNIV);
   }
 
   /**
@@ -703,11 +396,11 @@ public class Generator {
    * @param index Index of the department.
    */
   private void _generateADept(int index) {
-    writer_.startSection(CS_C_DEPT, _getId(CS_C_DEPT, index));
-    writer_.addProperty(CS_P_NAME, _getRelativeName(CS_C_DEPT, index), false);
-    writer_.addProperty(CS_P_SUBORGANIZATIONOF, CS_C_UNIV,
-                       _getId(CS_C_UNIV, instances_[CS_C_UNIV].count - 1));
-    writer_.endSection(CS_C_DEPT);
+    writer_.startSection(Ontology.CS_C_DEPT, _getId(Ontology.CS_C_DEPT, index));
+    writer_.addProperty(Ontology.CS_P_NAME, _getRelativeName(Ontology.CS_C_DEPT, index), false);
+    writer_.addProperty(Ontology.CS_P_SUBORGANIZATIONOF, Ontology.CS_C_UNIV,
+                       _getId(Ontology.CS_C_UNIV, instances_[Ontology.CS_C_UNIV].count - 1));
+    writer_.endSection(Ontology.CS_C_DEPT);
   }
 
   /**
@@ -715,9 +408,9 @@ public class Generator {
    * @param index Index of the faculty.
    */
   private void _generateAFaculty(int index) {
-    writer_.startSection(CS_C_FACULTY, _getId(CS_C_FACULTY, index));
-    _generateAFaculty_a(CS_C_FACULTY, index);
-    writer_.endSection(CS_C_FACULTY);
+    writer_.startSection(Ontology.CS_C_FACULTY, _getId(Ontology.CS_C_FACULTY, index));
+    _generateAFaculty_a(Ontology.CS_C_FACULTY, index);
+    writer_.endSection(Ontology.CS_C_FACULTY);
   }
 
   /**
@@ -729,36 +422,34 @@ public class Generator {
     int indexInFaculty;
     int courseNum;
     int courseIndex;
-    boolean dup;
-    CourseInfo course;
 
-    indexInFaculty = instances_[CS_C_FACULTY].count - 1;
+    indexInFaculty = instances_[Ontology.CS_C_FACULTY].count - 1;
 
-    writer_.addProperty(CS_P_NAME, _getRelativeName(type, index), false);
+    writer_.addProperty(Ontology.CS_P_NAME, _getRelativeName(type, index), false);
 
     //undergradutate courses
-    courseNum = _getRandomFromRange(FACULTY_COURSE_MIN, FACULTY_COURSE_MAX);
+    courseNum = _getRandomFromRange(GenerationParameters.FACULTY_COURSE_MIN, GenerationParameters.FACULTY_COURSE_MAX);
     for (int i = 0; i < courseNum; i++) {
       courseIndex = _AssignCourse(indexInFaculty);
-      writer_.addProperty(CS_P_TEACHEROF, _getId(CS_C_COURSE, courseIndex), true);
+      writer_.addProperty(Ontology.CS_P_TEACHEROF, _getId(Ontology.CS_C_COURSE, courseIndex), true);
     }
     //gradutate courses
-    courseNum = _getRandomFromRange(FACULTY_GRADCOURSE_MIN, FACULTY_GRADCOURSE_MAX);
+    courseNum = _getRandomFromRange(GenerationParameters.FACULTY_GRADCOURSE_MIN, GenerationParameters.FACULTY_GRADCOURSE_MAX);
     for (int i = 0; i < courseNum; i++) {
       courseIndex = _AssignGraduateCourse(indexInFaculty);
-      writer_.addProperty(CS_P_TEACHEROF, _getId(CS_C_GRADCOURSE, courseIndex), true);
+      writer_.addProperty(Ontology.CS_P_TEACHEROF, _getId(Ontology.CS_C_GRADCOURSE, courseIndex), true);
     }
     //person properties
-    writer_.addProperty(CS_P_UNDERGRADFROM, CS_C_UNIV,
-                       _getId(CS_C_UNIV, random_.nextInt(UNIV_NUM)));
-    writer_.addProperty(CS_P_GRADFROM, CS_C_UNIV,
-                       _getId(CS_C_UNIV, random_.nextInt(UNIV_NUM)));
-    writer_.addProperty(CS_P_DOCFROM, CS_C_UNIV,
-                       _getId(CS_C_UNIV, random_.nextInt(UNIV_NUM)));
-    writer_.addProperty(CS_P_WORKSFOR,
-                       _getId(CS_C_DEPT, instances_[CS_C_DEPT].count - 1), true);
-    writer_.addProperty(CS_P_EMAIL, _getEmail(type, index), false);
-    writer_.addProperty(CS_P_TELEPHONE, "xxx-xxx-xxxx", false);
+    writer_.addProperty(Ontology.CS_P_UNDERGRADFROM, Ontology.CS_C_UNIV,
+                       _getId(Ontology.CS_C_UNIV, random_.nextInt(GenerationParameters.UNIV_NUM)));
+    writer_.addProperty(Ontology.CS_P_GRADFROM, Ontology.CS_C_UNIV,
+                       _getId(Ontology.CS_C_UNIV, random_.nextInt(GenerationParameters.UNIV_NUM)));
+    writer_.addProperty(Ontology.CS_P_DOCFROM, Ontology.CS_C_UNIV,
+                       _getId(Ontology.CS_C_UNIV, random_.nextInt(GenerationParameters.UNIV_NUM)));
+    writer_.addProperty(Ontology.CS_P_WORKSFOR,
+                       _getId(Ontology.CS_C_DEPT, instances_[Ontology.CS_C_DEPT].count - 1), true);
+    writer_.addProperty(Ontology.CS_P_EMAIL, _getEmail(type, index), false);
+    writer_.addProperty(Ontology.CS_P_TELEPHONE, "xxx-xxx-xxxx", false);
   }
 
   /**
@@ -774,7 +465,7 @@ public class Generator {
 
     CourseInfo course = new CourseInfo();
     course.indexInFaculty = indexInFaculty;
-    course.globalIndex = ( (Integer) remainingUnderCourses_.get(pos)).intValue();
+    course.globalIndex = remainingUnderCourses_.get(pos).intValue();
     underCourses_.add(course);
 
     remainingUnderCourses_.remove(pos);
@@ -808,9 +499,9 @@ public class Generator {
    * @param index Index of the professor.
    */
   private void _generateAProf(int index) {
-    writer_.startSection(CS_C_PROF, _getId(CS_C_PROF, index));
-    _generateAProf_a(CS_C_PROF, index);
-    writer_.endSection(CS_C_PROF);
+    writer_.startSection(Ontology.CS_C_PROF, _getId(Ontology.CS_C_PROF, index));
+    _generateAProf_a(Ontology.CS_C_PROF, index);
+    writer_.endSection(Ontology.CS_C_PROF);
   }
 
   /**
@@ -820,9 +511,9 @@ public class Generator {
    */
   private void _generateAProf_a(int type, int index) {
     _generateAFaculty_a(type, index);
-    writer_.addProperty(CS_P_RESEARCHINTEREST,
-                       _getRelativeName(CS_C_RESEARCH,
-                                       random_.nextInt(RESEARCH_NUM)), false);
+    writer_.addProperty(Ontology.CS_P_RESEARCHINTEREST,
+                       _getRelativeName(Ontology.CS_C_RESEARCH,
+                                       random_.nextInt(GenerationParameters.RESEARCH_NUM)), false);
   }
 
   /**
@@ -832,15 +523,15 @@ public class Generator {
   private void _generateAFullProf(int index) {
     String id;
 
-    id = _getId(CS_C_FULLPROF, index);
-    writer_.startSection(CS_C_FULLPROF, id);
-    _generateAProf_a(CS_C_FULLPROF, index);
+    id = _getId(Ontology.CS_C_FULLPROF, index);
+    writer_.startSection(Ontology.CS_C_FULLPROF, id);
+    _generateAProf_a(Ontology.CS_C_FULLPROF, index);
     if (index == chair_) {
-      writer_.addProperty(CS_P_HEADOF,
-                         _getId(CS_C_DEPT, instances_[CS_C_DEPT].count - 1), true);
+      writer_.addProperty(Ontology.CS_P_HEADOF,
+                         _getId(Ontology.CS_C_DEPT, instances_[Ontology.CS_C_DEPT].count - 1), true);
     }
-    writer_.endSection(CS_C_FULLPROF);
-    _assignFacultyPublications(id, FULLPROF_PUB_MIN, FULLPROF_PUB_MAX);
+    writer_.endSection(Ontology.CS_C_FULLPROF);
+    _assignFacultyPublications(id, GenerationParameters.FULLPROF_PUB_MIN, GenerationParameters.FULLPROF_PUB_MAX);
   }
 
   /**
@@ -848,11 +539,11 @@ public class Generator {
    * @param index Index of the associate professor.
    */
   private void _generateAnAssociateProfessor(int index) {
-    String id = _getId(CS_C_ASSOPROF, index);
-    writer_.startSection(CS_C_ASSOPROF, id);
-    _generateAProf_a(CS_C_ASSOPROF, index);
-    writer_.endSection(CS_C_ASSOPROF);
-    _assignFacultyPublications(id, ASSOPROF_PUB_MIN, ASSOPROF_PUB_MAX);
+    String id = _getId(Ontology.CS_C_ASSOPROF, index);
+    writer_.startSection(Ontology.CS_C_ASSOPROF, id);
+    _generateAProf_a(Ontology.CS_C_ASSOPROF, index);
+    writer_.endSection(Ontology.CS_C_ASSOPROF);
+    _assignFacultyPublications(id, GenerationParameters.ASSOPROF_PUB_MIN, GenerationParameters.ASSOPROF_PUB_MAX);
   }
 
   /**
@@ -860,11 +551,11 @@ public class Generator {
    * @param index Index of the assistant professor.
    */
   private void _generateAnAssistantProfessor(int index) {
-    String id = _getId(CS_C_ASSTPROF, index);
-    writer_.startSection(CS_C_ASSTPROF, id);
-    _generateAProf_a(CS_C_ASSTPROF, index);
-    writer_.endSection(CS_C_ASSTPROF);
-    _assignFacultyPublications(id, ASSTPROF_PUB_MIN, ASSTPROF_PUB_MAX);
+    String id = _getId(Ontology.CS_C_ASSTPROF, index);
+    writer_.startSection(Ontology.CS_C_ASSTPROF, id);
+    _generateAProf_a(Ontology.CS_C_ASSTPROF, index);
+    writer_.endSection(Ontology.CS_C_ASSTPROF);
+    _assignFacultyPublications(id, GenerationParameters.ASSTPROF_PUB_MIN, GenerationParameters.ASSTPROF_PUB_MAX);
   }
 
   /**
@@ -872,11 +563,11 @@ public class Generator {
    * @param index Index of the lecturer.
    */
   private void _generateALecturer(int index) {
-    String id = _getId(CS_C_LECTURER, index);
-    writer_.startSection(CS_C_LECTURER, id);
-    _generateAFaculty_a(CS_C_LECTURER, index);
-    writer_.endSection(CS_C_LECTURER);
-    _assignFacultyPublications(id, LEC_PUB_MIN, LEC_PUB_MAX);
+    String id = _getId(Ontology.CS_C_LECTURER, index);
+    writer_.startSection(Ontology.CS_C_LECTURER, id);
+    _generateAFaculty_a(Ontology.CS_C_LECTURER, index);
+    writer_.endSection(Ontology.CS_C_LECTURER);
+    _assignFacultyPublications(id, GenerationParameters.LEC_PUB_MIN, GenerationParameters.LEC_PUB_MAX);
   }
 
   /**
@@ -892,8 +583,8 @@ public class Generator {
     num = _getRandomFromRange(min, max);
     for (int i = 0; i < num; i++) {
       publication = new PublicationInfo();
-      publication.id = _getId(CS_C_PUBLICATION, i, author);
-      publication.name = _getRelativeName(CS_C_PUBLICATION, i);
+      publication.id = _getId(Ontology.CS_C_PUBLICATION, i, author);
+      publication.name = _getRelativeName(Ontology.CS_C_PUBLICATION, i);
       publication.authors = new ArrayList<String>();
       publication.authors.add(author);
       publications_.add(publication);
@@ -912,9 +603,9 @@ public class Generator {
     PublicationInfo publication;
 
     num = _getRandomFromRange(min, max);
-    ArrayList list = _getRandomList(num, 0, publications_.size() - 1);
+    ArrayList<Integer> list = _getRandomList(num, 0, publications_.size() - 1);
     for (int i = 0; i < list.size(); i++) {
-      publication = (PublicationInfo) publications_.get( ( (Integer) list.get(i)).
+      publication = (PublicationInfo) publications_.get( list.get(i).
                                                intValue());
       publication.authors.add(author);
     }
@@ -935,13 +626,13 @@ public class Generator {
    * @param publication Information of the publication.
    */
   private void _generateAPublication(PublicationInfo publication) {
-    writer_.startSection(CS_C_PUBLICATION, publication.id);
-    writer_.addProperty(CS_P_NAME, publication.name, false);
+    writer_.startSection(Ontology.CS_C_PUBLICATION, publication.id);
+    writer_.addProperty(Ontology.CS_P_NAME, publication.name, false);
     for (int i = 0; i < publication.authors.size(); i++) {
-      writer_.addProperty(CS_P_PUBLICATIONAUTHOR,
+      writer_.addProperty(Ontology.CS_P_PUBLICATIONAUTHOR,
                          (String) publication.authors.get(i), true);
     }
-    writer_.endSection(CS_C_PUBLICATION);
+    writer_.endSection(Ontology.CS_C_PUBLICATION);
   }
 
   /**
@@ -950,11 +641,11 @@ public class Generator {
    * @param index Index of the instance within its type.
    */
   private void _generateAStudent_a(int type, int index) {
-    writer_.addProperty(CS_P_NAME, _getRelativeName(type, index), false);
-    writer_.addProperty(CS_P_MEMBEROF,
-                       _getId(CS_C_DEPT, instances_[CS_C_DEPT].count - 1), true);
-    writer_.addProperty(CS_P_EMAIL, _getEmail(type, index), false);
-    writer_.addProperty(CS_P_TELEPHONE, "xxx-xxx-xxxx", false);
+    writer_.addProperty(Ontology.CS_P_NAME, _getRelativeName(type, index), false);
+    writer_.addProperty(Ontology.CS_P_MEMBEROF,
+                       _getId(Ontology.CS_C_DEPT, instances_[Ontology.CS_C_DEPT].count - 1), true);
+    writer_.addProperty(Ontology.CS_P_EMAIL, _getEmail(type, index), false);
+    writer_.addProperty(Ontology.CS_P_TELEPHONE, "xxx-xxx-xxxx", false);
   }
 
   /**
@@ -963,21 +654,21 @@ public class Generator {
    */
   private void _generateAnUndergraduateStudent(int index) {
     int n;
-    ArrayList list;
+    ArrayList<Integer> list;
 
-    writer_.startSection(CS_C_UNDERSTUD, _getId(CS_C_UNDERSTUD, index));
-    _generateAStudent_a(CS_C_UNDERSTUD, index);
-    n = _getRandomFromRange(UNDERSTUD_COURSE_MIN, UNDERSTUD_COURSE_MAX);
+    writer_.startSection(Ontology.CS_C_UNDERSTUD, _getId(Ontology.CS_C_UNDERSTUD, index));
+    _generateAStudent_a(Ontology.CS_C_UNDERSTUD, index);
+    n = _getRandomFromRange(GenerationParameters.UNDERSTUD_COURSE_MIN, GenerationParameters.UNDERSTUD_COURSE_MAX);
     list = _getRandomList(n, 0, underCourses_.size() - 1);
     for (int i = 0; i < list.size(); i++) {
-      CourseInfo info = (CourseInfo) underCourses_.get( ( (Integer) list.get(i)).
+      CourseInfo info = (CourseInfo) underCourses_.get( list.get(i).
           intValue());
-      writer_.addProperty(CS_P_TAKECOURSE, _getId(CS_C_COURSE, info.globalIndex), true);
+      writer_.addProperty(Ontology.CS_P_TAKECOURSE, _getId(Ontology.CS_C_COURSE, info.globalIndex), true);
     }
-    if (0 == random_.nextInt(R_UNDERSTUD_ADVISOR)) {
-      writer_.addProperty(CS_P_ADVISOR, _selectAdvisor(), true);
+    if (0 == random_.nextInt(GenerationParameters.R_UNDERSTUD_ADVISOR)) {
+      writer_.addProperty(Ontology.CS_P_ADVISOR, _selectAdvisor(), true);
     }
-    writer_.endSection(CS_C_UNDERSTUD);
+    writer_.endSection(Ontology.CS_C_UNDERSTUD);
   }
 
   /**
@@ -986,27 +677,27 @@ public class Generator {
    */
   private void _generateAGradudateStudent(int index) {
     int n;
-    ArrayList list;
+    ArrayList<Integer> list;
     String id;
 
-    id = _getId(CS_C_GRADSTUD, index);
-    writer_.startSection(CS_C_GRADSTUD, id);
-    _generateAStudent_a(CS_C_GRADSTUD, index);
-    n = _getRandomFromRange(GRADSTUD_COURSE_MIN, GRADSTUD_COURSE_MAX);
+    id = _getId(Ontology.CS_C_GRADSTUD, index);
+    writer_.startSection(Ontology.CS_C_GRADSTUD, id);
+    _generateAStudent_a(Ontology.CS_C_GRADSTUD, index);
+    n = _getRandomFromRange(GenerationParameters.GRADSTUD_COURSE_MIN, GenerationParameters.GRADSTUD_COURSE_MAX);
     list = _getRandomList(n, 0, gradCourses_.size() - 1);
     for (int i = 0; i < list.size(); i++) {
-      CourseInfo info = (CourseInfo) gradCourses_.get( ( (Integer) list.get(i)).
+      CourseInfo info = (CourseInfo) gradCourses_.get( list.get(i).
           intValue());
-      writer_.addProperty(CS_P_TAKECOURSE,
-                         _getId(CS_C_GRADCOURSE, info.globalIndex), true);
+      writer_.addProperty(Ontology.CS_P_TAKECOURSE,
+                         _getId(Ontology.CS_C_GRADCOURSE, info.globalIndex), true);
     }
-    writer_.addProperty(CS_P_UNDERGRADFROM, CS_C_UNIV,
-                       _getId(CS_C_UNIV, random_.nextInt(UNIV_NUM)));
-    if (0 == random_.nextInt(R_GRADSTUD_ADVISOR)) {
-      writer_.addProperty(CS_P_ADVISOR, _selectAdvisor(), true);
+    writer_.addProperty(Ontology.CS_P_UNDERGRADFROM, Ontology.CS_C_UNIV,
+                       _getId(Ontology.CS_C_UNIV, random_.nextInt(GenerationParameters.UNIV_NUM)));
+    if (0 == random_.nextInt(GenerationParameters.R_GRADSTUD_ADVISOR)) {
+      writer_.addProperty(Ontology.CS_P_ADVISOR, _selectAdvisor(), true);
     }
-    _assignGraduateStudentPublications(id, GRADSTUD_PUB_MIN, GRADSTUD_PUB_MAX);
-    writer_.endSection(CS_C_GRADSTUD);
+    _assignGraduateStudentPublications(id, GenerationParameters.GRADSTUD_PUB_MIN, GenerationParameters.GRADSTUD_PUB_MAX);
+    writer_.endSection(Ontology.CS_C_GRADSTUD);
   }
 
   /**
@@ -1017,7 +708,7 @@ public class Generator {
     int profType;
     int index;
 
-    profType = _getRandomFromRange(CS_C_FULLPROF, CS_C_ASSTPROF);
+    profType = _getRandomFromRange(Ontology.CS_C_FULLPROF, Ontology.CS_C_ASSTPROF);
     index = random_.nextInt(instances_[profType].total);
     return _getId(profType, index);
   }
@@ -1027,9 +718,9 @@ public class Generator {
    * @param ta Information of the TA.
    */
   private void _generateATa(TaInfo ta) {
-    writer_.startAboutSection(CS_C_TA, _getId(CS_C_GRADSTUD, ta.indexInGradStud));
-    writer_.addProperty(CS_P_TAOF, _getId(CS_C_COURSE, ta.indexInCourse), true);
-    writer_.endSection(CS_C_TA);
+    writer_.startAboutSection(Ontology.CS_C_TA, _getId(Ontology.CS_C_GRADSTUD, ta.indexInGradStud));
+    writer_.addProperty(Ontology.CS_P_TAOF, _getId(Ontology.CS_C_COURSE, ta.indexInCourse), true);
+    writer_.endSection(Ontology.CS_C_TA);
   }
 
   /**
@@ -1037,8 +728,8 @@ public class Generator {
    * @param ra Information of the RA.
    */
   private void _generateAnRa(RaInfo ra) {
-    writer_.startAboutSection(CS_C_RA, _getId(CS_C_GRADSTUD, ra.indexInGradStud));
-    writer_.endSection(CS_C_RA);
+    writer_.startAboutSection(Ontology.CS_C_RA, _getId(Ontology.CS_C_GRADSTUD, ra.indexInGradStud));
+    writer_.endSection(Ontology.CS_C_RA);
   }
 
   /**
@@ -1046,10 +737,10 @@ public class Generator {
    * @param index Index of the course.
    */
   private void _generateACourse(int index) {
-    writer_.startSection(CS_C_COURSE, _getId(CS_C_COURSE, index));
-    writer_.addProperty(CS_P_NAME,
-                       _getRelativeName(CS_C_COURSE, index), false);
-    writer_.endSection(CS_C_COURSE);
+    writer_.startSection(Ontology.CS_C_COURSE, _getId(Ontology.CS_C_COURSE, index));
+    writer_.addProperty(Ontology.CS_P_NAME,
+                       _getRelativeName(Ontology.CS_C_COURSE, index), false);
+    writer_.endSection(Ontology.CS_C_COURSE);
   }
 
   /**
@@ -1057,10 +748,10 @@ public class Generator {
    * @param index Index of the graduate course.
    */
   private void _generateAGraduateCourse(int index) {
-    writer_.startSection(CS_C_GRADCOURSE, _getId(CS_C_GRADCOURSE, index));
-    writer_.addProperty(CS_P_NAME,
-                       _getRelativeName(CS_C_GRADCOURSE, index), false);
-    writer_.endSection(CS_C_GRADCOURSE);
+    writer_.startSection(Ontology.CS_C_GRADCOURSE, _getId(Ontology.CS_C_GRADCOURSE, index));
+    writer_.addProperty(Ontology.CS_P_NAME,
+                       _getRelativeName(Ontology.CS_C_GRADCOURSE, index), false);
+    writer_.endSection(Ontology.CS_C_GRADCOURSE);
   }
 
   /**
@@ -1080,29 +771,25 @@ public class Generator {
    * Chooses RAs and TAs from graduate student and generates their instances accordingly.
    */
   private void _generateRaTa() {
-    ArrayList list, courseList;
+    ArrayList<Integer> list, courseList;
     TaInfo ta;
     RaInfo ra;
-    ArrayList tas, ras;
     int i;
 
-    tas = new ArrayList();
-    ras = new ArrayList();
-    list = _getRandomList(instances_[CS_C_TA].total + instances_[CS_C_RA].total,
-                      0, instances_[CS_C_GRADSTUD].total - 1);
-    courseList = _getRandomList(instances_[CS_C_TA].total, 0,
+    list = _getRandomList(instances_[Ontology.CS_C_TA].total + instances_[Ontology.CS_C_RA].total,
+                      0, instances_[Ontology.CS_C_GRADSTUD].total - 1);
+    courseList = _getRandomList(instances_[Ontology.CS_C_TA].total, 0,
                             underCourses_.size() - 1);
 
-    for (i = 0; i < instances_[CS_C_TA].total; i++) {
+    for (i = 0; i < instances_[Ontology.CS_C_TA].total; i++) {
       ta = new TaInfo();
-      ta.indexInGradStud = ( (Integer) list.get(i)).intValue();
-      ta.indexInCourse = ( (CourseInfo) underCourses_.get( ( (Integer)
-          courseList.get(i)).intValue())).globalIndex;
+      ta.indexInGradStud = list.get(i).intValue();
+      ta.indexInCourse = ( (CourseInfo) underCourses_.get( courseList.get(i).intValue())).globalIndex;
       _generateATa(ta);
     }
     while (i < list.size()) {
       ra = new RaInfo();
-      ra.indexInGradStud = ( (Integer) list.get(i)).intValue();
+      ra.indexInGradStud = list.get(i).intValue();
       _generateAnRa(ra);
       i++;
     }
@@ -1114,11 +801,11 @@ public class Generator {
    */
   private void _generateAResearchGroup(int index) {
     String id;
-    id = _getId(CS_C_RESEARCHGROUP, index);
-    writer_.startSection(CS_C_RESEARCHGROUP, id);
-    writer_.addProperty(CS_P_SUBORGANIZATIONOF,
-                       _getId(CS_C_DEPT, instances_[CS_C_DEPT].count - 1), true);
-    writer_.endSection(CS_C_RESEARCHGROUP);
+    id = _getId(Ontology.CS_C_RESEARCHGROUP, index);
+    writer_.startSection(Ontology.CS_C_RESEARCHGROUP, id);
+    writer_.addProperty(Ontology.CS_P_SUBORGANIZATIONOF,
+                       _getId(Ontology.CS_C_DEPT, instances_[Ontology.CS_C_DEPT].count - 1), true);
+    writer_.endSection(Ontology.CS_C_RESEARCHGROUP);
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -1140,16 +827,16 @@ public class Generator {
     String id;
 
     switch (classType) {
-      case CS_C_UNIV:
+      case Ontology.CS_C_UNIV:
         id = "http://www." + _getRelativeName(classType, index) + ".edu";
         break;
-      case CS_C_DEPT:
+      case Ontology.CS_C_DEPT:
         id = "http://www." + _getRelativeName(classType, index) + "." +
-            _getRelativeName(CS_C_UNIV, instances_[CS_C_UNIV].count - 1) +
+            _getRelativeName(Ontology.CS_C_UNIV, instances_[Ontology.CS_C_UNIV].count - 1) +
             ".edu";
         break;
       default:
-        id = _getId(CS_C_DEPT, instances_[CS_C_DEPT].count - 1) + ID_DELIMITER +
+        id = _getId(Ontology.CS_C_DEPT, instances_[Ontology.CS_C_DEPT].count - 1) + ID_DELIMITER +
             _getRelativeName(classType, index);
         break;
     }
@@ -1168,9 +855,9 @@ public class Generator {
     String id;
 
     switch (classType) {
-      case CS_C_PUBLICATION:
+      case Ontology.CS_C_PUBLICATION:
         //NOTE: param is author id
-        id = param + ID_DELIMITER + CLASS_TOKEN[classType] + index;
+        id = param + ID_DELIMITER + Ontology.CLASS_TOKEN[classType] + index;
         break;
       default:
         id = _getId(classType, index);
@@ -1190,24 +877,24 @@ public class Generator {
     String name;
 
     switch (classType) {
-      case CS_C_UNIV:
+      case Ontology.CS_C_UNIV:
         name = _getRelativeName(classType, index);
         break;
-      case CS_C_DEPT:
+      case Ontology.CS_C_DEPT:
         name = _getRelativeName(classType, index) + INDEX_DELIMITER +
-            (instances_[CS_C_UNIV].count - 1);
+            (instances_[Ontology.CS_C_UNIV].count - 1);
         break;
       //NOTE: Assume departments with the same index share the same pool of courses and researches
-      case CS_C_COURSE:
-      case CS_C_GRADCOURSE:
-      case CS_C_RESEARCH:
+      case Ontology.CS_C_COURSE:
+      case Ontology.CS_C_GRADCOURSE:
+      case Ontology.CS_C_RESEARCH:
         name = _getRelativeName(classType, index) + INDEX_DELIMITER +
-            (instances_[CS_C_DEPT].count - 1);
+            (instances_[Ontology.CS_C_DEPT].count - 1);
         break;
       default:
         name = _getRelativeName(classType, index) + INDEX_DELIMITER +
-            (instances_[CS_C_DEPT].count - 1) + INDEX_DELIMITER +
-            (instances_[CS_C_UNIV].count - 1);
+            (instances_[Ontology.CS_C_DEPT].count - 1) + INDEX_DELIMITER +
+            (instances_[Ontology.CS_C_UNIV].count - 1);
         break;
     }
 
@@ -1224,15 +911,15 @@ public class Generator {
     String name;
 
     switch (classType) {
-      case CS_C_UNIV:
+      case Ontology.CS_C_UNIV:
         //should be unique too!
-        name = CLASS_TOKEN[classType] + index;
+        name = Ontology.CLASS_TOKEN[classType] + index;
         break;
-      case CS_C_DEPT:
-        name = CLASS_TOKEN[classType] + index;
+      case Ontology.CS_C_DEPT:
+        name = Ontology.CLASS_TOKEN[classType] + index;
         break;
       default:
-        name = CLASS_TOKEN[classType] + index;
+        name = Ontology.CLASS_TOKEN[classType] + index;
         break;
     }
 
@@ -1249,19 +936,19 @@ public class Generator {
     String email = "";
 
     switch (classType) {
-      case CS_C_UNIV:
+      case Ontology.CS_C_UNIV:
         email += _getRelativeName(classType, index) + "@" +
             _getRelativeName(classType, index) + ".edu";
         break;
-      case CS_C_DEPT:
+      case Ontology.CS_C_DEPT:
         email += _getRelativeName(classType, index) + "@" +
             _getRelativeName(classType, index) + "." +
-            _getRelativeName(CS_C_UNIV, instances_[CS_C_UNIV].count - 1) + ".edu";
+            _getRelativeName(Ontology.CS_C_UNIV, instances_[Ontology.CS_C_UNIV].count - 1) + ".edu";
         break;
       default:
         email += _getRelativeName(classType, index) + "@" +
-            _getRelativeName(CS_C_DEPT, instances_[CS_C_DEPT].count - 1) +
-            "." + _getRelativeName(CS_C_UNIV, instances_[CS_C_UNIV].count - 1) +
+            _getRelativeName(Ontology.CS_C_DEPT, instances_[Ontology.CS_C_DEPT].count - 1) +
+            "." + _getRelativeName(Ontology.CS_C_UNIV, instances_[Ontology.CS_C_UNIV].count - 1) +
             ".edu";
         break;
     }
@@ -1279,7 +966,7 @@ public class Generator {
 
     instances_[classType].count++;
     subClass = classType;
-    while ( (superClass = CLASS_INFO[subClass][INDEX_SUPER]) != CS_C_NULL) {
+    while ( (superClass = Ontology.CLASS_INFO[subClass][Ontology.INDEX_SUPER]) != Ontology.CS_C_NULL) {
       instances_[superClass].count++;
       subClass = superClass;
     }
@@ -1293,7 +980,7 @@ public class Generator {
    * @param max Maximum value of selectable integer.
    * @return So generated list of integers.
    */
-  private ArrayList _getRandomList(int num, int min, int max) {
+  private ArrayList<Integer> _getRandomList(int num, int min, int max) {
     ArrayList<Integer> list = new ArrayList<Integer>();
     ArrayList<Integer> tmp = new ArrayList<Integer>();
     for (int i = min; i <= max; i++) {
@@ -1302,7 +989,7 @@ public class Generator {
 
     for (int i = 0; i < num; i++) {
       int pos = _getRandomFromRange(0, tmp.size() - 1);
-      list.add( (Integer) tmp.get(pos));
+      list.add(tmp.get(pos));
       tmp.remove(pos);
     }
 
@@ -1338,8 +1025,8 @@ public class Generator {
     log_.println(comment);
     comment = "----------------------------";
     log_.println(comment);
-    for (int i = 0; i < CLASS_NUM; i++) {
-      comment = CLASS_TOKEN[i] + " " + instances_[i].logNum + " " +
+    for (int i = 0; i < Ontology.CLASS_NUM; i++) {
+      comment = Ontology.CLASS_TOKEN[i] + " " + instances_[i].logNum + " " +
           instances_[i].logTotal;
       log_.println(comment);
       classInstNum += instances_[i].logNum;
@@ -1357,8 +1044,8 @@ public class Generator {
     log_.println(comment);
     comment = "-------------------------------";
     log_.println(comment);
-    for (int i = 0; i < PROP_NUM; i++) {
-      comment = PROP_TOKEN[i] + " " + properties_[i].logNum;
+    for (int i = 0; i < Ontology.PROP_NUM; i++) {
+      comment = Ontology.PROP_TOKEN[i] + " " + properties_[i].logNum;
       comment = comment + " " + properties_[i].logTotal;
       log_.println(comment);
       propInstNum += properties_[i].logNum;

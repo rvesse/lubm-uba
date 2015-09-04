@@ -7,6 +7,8 @@ Data Generator for the LUBM Benchmark, this is basically the official code for t
 - Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
 - Use a proper command line parsing library that provides meaningful built in help and parsing errors
 - Bug fix to use OS specific file separator
+- Require Java 1.7
+- Refactor code to make it cleaner while keeping behaviour as-is
 
 ## Usage
 

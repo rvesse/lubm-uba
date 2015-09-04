@@ -11,9 +11,9 @@
 
   <properties>
     <!-- Build properties -->
-    <jdk.source>1.5</jdk.source>
-    <jdk.target>1.5</jdk.target>
-    <jdk.minimum>1.5</jdk.minimum>
+    <jdk.source>1.7</jdk.source>
+    <jdk.target>1.7</jdk.target>
+    <jdk.minimum>1.7</jdk.minimum>
 
     <!-- Dependency Versions -->
     <dependency.airline.version>1.0.1</dependency.airline.version>
