@@ -1,5 +1,7 @@
 package edu.lehigh.swat.bench.uba;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
@@ -27,6 +29,10 @@ class UniversityGenerator implements Runnable {
             this.univState.setComplete();
         } catch (Throwable e) {
             LOGGER.error("Error in generating University {} - {}", this.univState.getUniversityIndex(), e);
+            StringWriter strWriter = new StringWriter();
+            PrintWriter writer = new PrintWriter(strWriter);
+            e.printStackTrace(writer);
+            LOGGER.error(strWriter.toString());
         }
     }
 

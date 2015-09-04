@@ -9,13 +9,16 @@ Data Generator for the LUBM Benchmark, this is basically the official code for t
     - Added support for NTriples format output
     - Added support for compressed output (Gzip)
     - Use a proper command line parsing library that provides meaningful built in help and parsing errors
+    - New command line options:
         - Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
-        - Added `--format <format>` option to control the output format
+        - Added `--format <format>` option to control the output format, supports `OWL`, `DAML` and `NTRIPLES`
         - Added `--compress` option which compresses output files with GZip as they are generated
         - Added `-t <threads>`/`--threads <threads>` option to allow parallel data generation for better performance
 - Build Changes
-    - Require Java 1.7
+    - Now requires Java 1.7
     - `pom.xml` and changed directory structure to be able to build with Maven
+    - Build a shaded JAR so the JAR can be run directly
+    - Added useful dependencies
 - Bug fixes
      - Use OS specific filename separator character
      - Check for errors when writing files

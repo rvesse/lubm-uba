@@ -73,6 +73,7 @@ public class Generator {
             UniversityState univState = new UniversityState(state, i + state.getStartIndex());
             UniversityGenerator univGen = new UniversityGenerator(univState);
             state.getExecutor().submit(univGen);
+            states.add(univState);
         }
         try {
             state.getExecutor().shutdown();
@@ -85,8 +86,10 @@ public class Generator {
 
         // Check everything completed
         for (UniversityState univState : states) {
-            if (!univState.hasCompleted())
-                throw new RuntimeException("Not all university generators finished successfully, see log for details");
+            if (!univState.hasCompleted()) {
+                System.err.println("Not all university generators finished successfully, see log for details");
+                System.exit(3);
+            }
         }
 
         System.out.println("Completed!");

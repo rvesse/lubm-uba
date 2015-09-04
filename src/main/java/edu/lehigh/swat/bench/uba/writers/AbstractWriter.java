@@ -30,7 +30,7 @@ public class AbstractWriter {
             }
             out = new PrintStream(stream);
         } catch (IOException e) {
-            System.out.println("Create file failure!");
+            throw new RuntimeException("Create file failure!", e);
         }
     }
 
