@@ -6,9 +6,13 @@ Data Generator for the LUBM Benchmark, this is basically the official code for t
     - `generate.sh` script for launching
     - Refactor code to make it cleaner while keeping behaviour as-is
     - Use log4j for logging
+    - Added support for NTriples format output
+    - Added support for compressed output (Gzip)
     - Use a proper command line parsing library that provides meaningful built in help and parsing errors
         - Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
-        - Added `-t <threads>`/`--threads <threads>` option to control parallel data generation for better performance
+        - Added `--format <format>` option to control the output format
+        - Added `--compress` option which compresses output files with GZip as they are generated
+        - Added `-t <threads>`/`--threads <threads>` option to allow parallel data generation for better performance
 - Build Changes
     - Require Java 1.7
     - `pom.xml` and changed directory structure to be able to build with Maven

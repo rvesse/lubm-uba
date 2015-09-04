@@ -5,8 +5,6 @@ import edu.lehigh.swat.bench.uba.model.Ontology;
 
 public class NTriplesWriter extends NonNestedWriter {
     
-    private static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
-
     public NTriplesWriter(GeneratorCallbackTarget target, String ontologyUrl) {
         super(target, ontologyUrl);
     }

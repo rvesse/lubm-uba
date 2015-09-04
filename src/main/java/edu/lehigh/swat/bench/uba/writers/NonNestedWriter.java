@@ -7,6 +7,10 @@ import edu.lehigh.swat.bench.uba.model.Ontology;
 
 public abstract class NonNestedWriter extends AbstractWriter implements Writer {
 
+    protected static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+    protected static final String OWL_ONTOLOGY = "http://www.w3.org/2002/07/owl#Ontology";
+    protected static final String OWL_IMPORTS = "http://www.w3.org/2002/07/owl#imports";
+    
     protected final String ontologyUrl;
     private final Stack<String> subjects = new Stack<String>();
     private long nextId = 0;
@@ -19,6 +23,12 @@ public abstract class NonNestedWriter extends AbstractWriter implements Writer {
     @Override
     public void startFile(String fileName) {
         prepareOutputStream(fileName);
+        
+        // Add Ontology declaration
+        this.subjects.push("");
+        this.addTriple(RDF_TYPE, OWL_ONTOLOGY, true);
+        this.addTriple(OWL_IMPORTS, this.ontologyUrl, true);
+        this.subjects.pop();
     }
 
     @Override
