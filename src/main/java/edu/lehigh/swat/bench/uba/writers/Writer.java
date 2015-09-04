@@ -21,16 +21,6 @@ package edu.lehigh.swat.bench.uba.writers;
 
 public interface Writer {
   /**
-   * Called when starting data generation.
-   */
-  public void start();
-
-  /**
-   * Called when finish data generation.
-   */
-  public void end();
-
-  /**
    * Starts file writing.
    * @param fileName File name.
    */

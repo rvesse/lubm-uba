@@ -10,6 +10,4 @@ public class InstanceCount {
     public int count = 0;
     /** total number so far within the current department */
     public int logNum = 0;
-    /** total number so far */
-    public long logTotal = 0l;
 }

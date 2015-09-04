@@ -14,6 +14,8 @@ import com.github.rvesse.airline.Option;
 import com.github.rvesse.airline.SingleCommand;
 import com.github.rvesse.airline.parser.ParseException;
 
+import edu.lehigh.swat.bench.uba.writers.WriterType;
+
 @Command(name = "generate.sh", description = "Artificial Data Generator for the Lehigh University Benchmark (LUBM) for SPARQL query engines", exitCodes = {
         0, 1, 2, 3 }, exitDescriptions = { "Data was generated successfully", "Help was displayed", "Invalid arguments",
                 "Error during data generation" })
@@ -83,7 +85,7 @@ public class Launcher {
 
             // Run the generator
             Generator generator = new Generator();
-            generator.start(launcher.univNum, launcher.startIndex, launcher.seed, launcher.daml, launcher.ontology,
+            generator.start(launcher.univNum, launcher.startIndex, launcher.seed, launcher.daml ? WriterType.DAML : WriterType.OWL, launcher.ontology,
                     launcher.workDir);
 
         } catch (ParseException e) {

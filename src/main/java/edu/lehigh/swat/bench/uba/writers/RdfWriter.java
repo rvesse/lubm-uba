@@ -62,18 +62,6 @@ public abstract class RdfWriter implements Writer {
     }
 
     /**
-     * Implementation of Writer:start.
-     */
-    public void start() {
-    }
-
-    /**
-     * Implementation of Writer:end.
-     */
-    public void end() {
-    }
-
-    /**
      * Implementation of Writer:startFile.
      */
     public void startFile(String fileName) {
