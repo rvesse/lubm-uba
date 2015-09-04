@@ -9,6 +9,7 @@ Data Generator for the LUBM Benchmark, this is basically the official code for t
 - Bug fix to use OS specific file separator
 - Require Java 1.7
 - Refactor code to make it cleaner while keeping behaviour as-is
+- Use log4j for logging
 
 ## Usage
 

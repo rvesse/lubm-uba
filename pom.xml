@@ -17,6 +17,8 @@
 
     <!-- Dependency Versions -->
     <dependency.airline.version>1.0.1</dependency.airline.version>
+    <dependency.log4j.version>1.2.17</dependency.log4j.version>
+    <dependency.slf4j.version>1.7.12</dependency.slf4j.version>
 
     <!-- Plugin versions -->
     <plugin.compiler.version>3.2</plugin.compiler.version>
@@ -31,6 +33,24 @@
       <groupId>com.github.rvesse</groupId>
       <artifactId>airline</artifactId>
       <version>${dependency.airline.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${dependency.slf4j.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${dependency.slf4j.version}</version>
+    </dependency>
+    
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>${dependency.log4j.version}</version>
     </dependency>
   </dependencies>
 
