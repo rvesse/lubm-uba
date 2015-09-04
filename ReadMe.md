@@ -2,14 +2,19 @@
  
 Data Generator for the LUBM Benchmark, this is basically the official code for the generator with some minor tweaks:
 
-- `generate.sh` script for launching
-- `pom.xml` and changed directory structure to be able to build with Maven
-- Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
-- Use a proper command line parsing library that provides meaningful built in help and parsing errors
-- Bug fix to use OS specific file separator
-- Require Java 1.7
-- Refactor code to make it cleaner while keeping behaviour as-is
-- Use log4j for logging
+- Improvements
+    - `generate.sh` script for launching
+    - Refactor code to make it cleaner while keeping behaviour as-is
+    - Use log4j for logging
+    - Use a proper command line parsing library that provides meaningful built in help and parsing errors
+        - Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
+        - Added `-t <threads>`/`--threads <threads>` option to control parallel data generation for better performance
+- Build Changes
+    - Require Java 1.7
+    - `pom.xml` and changed directory structure to be able to build with Maven
+- Bug fixes
+     - Use OS specific filename separator character
+     - Check for errors when writing files
 
 ## Usage
 

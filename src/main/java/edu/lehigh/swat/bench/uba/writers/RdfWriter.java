@@ -19,12 +19,10 @@
 
 package edu.lehigh.swat.bench.uba.writers;
 
-import java.io.*;
-
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
-public abstract class RdfWriter implements Writer {
+public abstract class RdfWriter extends AbstractWriter implements Writer {
     /** abbreviation of univ-bench ontology namesapce */
     static final String T_ONTO_NS = "ub";
     /** prefix of univ-bench ontology namespace */
@@ -43,14 +41,6 @@ public abstract class RdfWriter implements Writer {
     static final String T_RDF_ABOUT = T_RDF_PREFIX + "about";
     /** string of "rdf:resource */
     static final String T_RDF_RES = T_RDF_PREFIX + "resource";
-    /** white space string */
-    static final String T_SPACE = " ";
-
-    /** output stream */
-    PrintStream out = null;
-    /** the generator */
-    GeneratorCallbackTarget callbackTarget;
-
     /**
      * Creates a new RDF writer
      * 
@@ -58,7 +48,7 @@ public abstract class RdfWriter implements Writer {
      *            The callback target
      */
     public RdfWriter(GeneratorCallbackTarget callbackTarget) {
-        this.callbackTarget = callbackTarget;
+        super(callbackTarget);
     }
 
     /**
@@ -66,16 +56,17 @@ public abstract class RdfWriter implements Writer {
      */
     public void startFile(String fileName) {
         String s;
-        try {
-            out = new PrintStream(new FileOutputStream(fileName));
-            s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
-            out.println(s);
-            s = "<" + T_RDF_PREFIX + "RDF";
-            out.println(s);
-            writeHeader();
-        } catch (IOException e) {
-            System.out.println("Create file failure!");
-        }
+        prepareOutputStream(fileName);
+
+        // XML header
+        s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
+        out.println(s);
+
+        // Root rdf:RDF element
+        s = "<" + T_RDF_PREFIX + "RDF";
+        out.println(s);
+        writeHeader();
+
     }
 
     /**
@@ -85,7 +76,8 @@ public abstract class RdfWriter implements Writer {
         String s;
         s = "</" + T_RDF_PREFIX + "RDF>";
         out.println(s);
-        out.close();
+
+        cleanupOutputStream();
     }
 
     /**

@@ -36,8 +36,8 @@ public class Launcher {
             "--seed" }, title = "Seed", arity = 1, description = "Seed used for random data generation (default 0)")
     private int seed = 0;
 
-    @Option(name = { "--daml" }, description = "Generate DAML+OIL data instead of OWL data")
-    private boolean daml = false;
+    @Option(name = { "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format", allowedValues = { "OWL", "DAML", "NTRIPLES" })
+    private WriterType format = WriterType.OWL;
 
     @Option(name = { "--onto",
             "--ontology" }, title = "OntologyUrl", description = "URL for the benchmark ontology used as the base URL in the generated data (default http://swat.cse.lehigh.edu/onto/univ-bench.owl)")
@@ -59,6 +59,9 @@ public class Launcher {
     @Option(name = { "-t",
             "--threads" }, title = "NumThreads", arity = 1, description = "Sets the number of threads to use for data generation (default 1) which can speed up generating data for larger numbers of universities")
     private int threads = 1;
+    
+    @Option(name = { "--compress" }, description = "When set output files are automatically compressed with GZip")
+    private boolean compress = false;
 
     @Inject
     private HelpOption help;
@@ -90,7 +93,7 @@ public class Launcher {
             // Run the generator
             Generator generator = new Generator();
             generator.start(launcher.univNum, launcher.startIndex, launcher.seed,
-                    launcher.daml ? WriterType.DAML : WriterType.OWL, launcher.ontology, launcher.workDir, launcher.threads);
+                    launcher.format, launcher.ontology, launcher.workDir, launcher.compress, launcher.threads);
 
         } catch (ParseException e) {
             System.err.println(e.getMessage());

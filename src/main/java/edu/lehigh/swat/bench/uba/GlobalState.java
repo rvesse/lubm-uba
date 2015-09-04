@@ -26,16 +26,18 @@ public class GlobalState {
 
     private final WriterType writerType;
     private final File outputDir;
+    private final boolean compress;
     
     private final ExecutorService executorService;
     
-    public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir, int threads) {
+    public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir, boolean compress, int threads) {
         this.numUniversities = univNum;
         this.baseSeed = baseSeed;
         this.startIndex = startIndex;
         this.ontology = ontologyUrl;
         this.writerType = type;
         this.outputDir = outputDir;
+        this.compress = compress;
 
         this.totalInstancesGenerated = new AtomicLong[Ontology.CLASS_NUM];
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
@@ -75,6 +77,10 @@ public class GlobalState {
     
     public File getOutputDirectory() {
         return this.outputDir;
+    }
+    
+    public boolean compressFiles() {
+        return this.compress;
     }
     
     public ExecutorService getExecutor() {

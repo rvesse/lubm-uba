@@ -10,6 +10,7 @@ import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.model.PropertyCount;
 import edu.lehigh.swat.bench.uba.model.PublicationInfo;
 import edu.lehigh.swat.bench.uba.writers.DamlWriter;
+import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
 import edu.lehigh.swat.bench.uba.writers.OwlWriter;
 import edu.lehigh.swat.bench.uba.writers.Writer;
 
@@ -89,6 +90,9 @@ public class UniversityState implements GeneratorCallbackTarget {
         case DAML:
             writer = new DamlWriter(this, state.getOntologyUrl());
             break;
+        case NTRIPLES:
+            writer = new NTriplesWriter(this, state.getOntologyUrl());
+            break;
         default:
             throw new RuntimeException("Invalid writer type specified");
         }
@@ -149,8 +153,16 @@ public class UniversityState implements GeneratorCallbackTarget {
         case DAML:
             fileName.append(".daml");
             break;
+        case NTRIPLES:
+            fileName.append(".nt");
+            break;
         default:
             throw new RuntimeException("Unknown writer type");
+        }
+        
+        // Compression?
+        if (this.state.compressFiles()) {
+            fileName.append(".gz");
         }
         
         return fileName.toString();
