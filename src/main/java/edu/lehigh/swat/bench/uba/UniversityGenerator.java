@@ -179,7 +179,7 @@ class UniversityGenerator implements Runnable {
         univState.getWriter().addProperty(Ontology.CS_P_NAME, univState.getRelativeName(Ontology.CS_C_DEPT, index),
                 false);
         univState.getWriter().addProperty(Ontology.CS_P_SUBORGANIZATIONOF, Ontology.CS_C_UNIV,
-                univState.getId(Ontology.CS_C_UNIV, univState.getInstances()[Ontology.CS_C_UNIV].count - 1));
+                univState.getId(Ontology.CS_C_UNIV, univState.getUniversityIndex()));
         univState.getWriter().endSection(Ontology.CS_C_DEPT);
     }
 

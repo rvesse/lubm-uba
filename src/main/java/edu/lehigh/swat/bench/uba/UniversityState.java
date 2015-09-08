@@ -186,7 +186,7 @@ public class UniversityState implements GeneratorCallbackTarget {
             break;
         case Ontology.CS_C_DEPT:
             name = getRelativeName(classType, index) + Generator.INDEX_DELIMITER
-                    + (this.instances[Ontology.CS_C_UNIV].count - 1);
+                    + (this.getUniversityIndex());
             break;
         // NOTE: Assume departments with the same index share the same pool of
         // courses and researches
@@ -199,7 +199,7 @@ public class UniversityState implements GeneratorCallbackTarget {
         default:
             name = getRelativeName(classType, index) + Generator.INDEX_DELIMITER
                     + (this.instances[Ontology.CS_C_DEPT].count - 1) + Generator.INDEX_DELIMITER
-                    + (this.instances[Ontology.CS_C_UNIV].count - 1);
+                    + (this.getUniversityIndex());
             break;
         }
 
@@ -253,12 +253,12 @@ public class UniversityState implements GeneratorCallbackTarget {
             break;
         case Ontology.CS_C_DEPT:
             email += getRelativeName(classType, index) + "@" + getRelativeName(classType, index) + "."
-                    + getRelativeName(Ontology.CS_C_UNIV, this.instances[Ontology.CS_C_UNIV].count - 1) + ".edu";
+                    + getRelativeName(Ontology.CS_C_UNIV, this.getUniversityIndex()) + ".edu";
             break;
         default:
             email += getRelativeName(classType, index) + "@"
                     + getRelativeName(Ontology.CS_C_DEPT, this.instances[Ontology.CS_C_DEPT].count - 1) + "."
-                    + getRelativeName(Ontology.CS_C_UNIV, this.instances[Ontology.CS_C_UNIV].count - 1) + ".edu";
+                    + getRelativeName(Ontology.CS_C_UNIV, this.getUniversityIndex()) + ".edu";
             break;
         }
 
@@ -283,7 +283,7 @@ public class UniversityState implements GeneratorCallbackTarget {
             break;
         case Ontology.CS_C_DEPT:
             id = "http://www." + getRelativeName(classType, index) + "."
-                    + getRelativeName(Ontology.CS_C_UNIV, this.instances[Ontology.CS_C_UNIV].count - 1)
+                    + getRelativeName(Ontology.CS_C_UNIV, this.getUniversityIndex())
                     + ".edu";
             break;
         default:
