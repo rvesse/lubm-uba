@@ -22,7 +22,10 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
     @Override
     public void startFile(String fileName) {
         prepareOutputStream(fileName);
-        
+        addOntologyDeclaration();
+    }
+
+    protected void addOntologyDeclaration() {
         // Add Ontology declaration
         this.subjects.push("");
         this.addTriple(RDF_TYPE, OWL_ONTOLOGY, true);

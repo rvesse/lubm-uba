@@ -1,9 +1,15 @@
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
 public class TurtleWriter extends FlatWriter {
+
+    private String lastSubject;
+    private Map<String, String> prefixes = new HashMap<>();
 
     public TurtleWriter(GeneratorCallbackTarget target, String ontologyUrl) {
         super(target, ontologyUrl);
@@ -11,23 +17,49 @@ public class TurtleWriter extends FlatWriter {
 
     @Override
     public void startFile(String fileName) {
-        super.startFile(fileName);
+        prepareOutputStream(fileName);
 
         // Add prefix declarations
         prefix(WriterVocabulary.T_RDF_NS, WriterVocabulary.T_RDF_NS_URI);
         prefix(WriterVocabulary.T_RDFS_NS, WriterVocabulary.T_RDFS_NS_URI);
         prefix(WriterVocabulary.T_OWL_NS, WriterVocabulary.T_OWL_NS_URI);
-        prefix(WriterVocabulary.T_ONTO_NS, this.ontologyUrl);
+        if (this.ontologyUrl.endsWith("#") || this.ontologyUrl.endsWith("/")) {
+            prefix(WriterVocabulary.T_ONTO_NS, this.ontologyUrl);
+        } else {
+            prefix(WriterVocabulary.T_ONTO_NS, this.ontologyUrl + "#");
+        }
+
+        addOntologyDeclaration();
+    }
+
+    @Override
+    public void endFile() {
+        if (lastSubject != null) {
+            endPredicateObjectList();
+        }
+
+        super.endFile();
     }
 
     protected void prefix(String prefix, String uri) {
         out.format("@prefix %s: <%s> .", prefix, uri);
+        prefixes.put(uri, prefix);
         out.println();
     }
 
     @Override
     protected void addTriple(String property, String object, boolean isResource) {
-        out.print(subjectOrObjectUri(this.getCurrentSubject()));
+        String currSubject = this.getCurrentSubject();
+
+        if (lastSubject != null) {
+            if (!lastSubject.equals(currSubject)) {
+                // Start new predicate object list
+                endPredicateObjectList();
+                startPredicateObjectList(currSubject);
+            }
+        } else {
+            startPredicateObjectList(currSubject);
+        }
         out.print(' ');
         out.print(predicate(property));
         out.print(' ');
@@ -36,31 +68,42 @@ public class TurtleWriter extends FlatWriter {
         } else {
             out.format("\"%s\"", object);
         }
+        out.println(" ;");
+    }
+
+    protected void endPredicateObjectList() {
         out.println('.');
+        lastSubject = null;
+    }
+
+    protected void startPredicateObjectList(String currSubject) {
+        out.print(subjectOrObjectUri(currSubject));
+        lastSubject = currSubject;
     }
 
     @Override
     protected void addTypeTriple(String subject, int classType) {
         String classUrl = String.format("%s#%s", this.ontologyUrl, Ontology.CLASS_TOKEN[classType]);
-        addTriple(RDF_TYPE, classUrl, true);
+        if (lastSubject != null) {
+            if (!lastSubject.equals(subject)) {
+                endPredicateObjectList();
+                startPredicateObjectList(subject);
+            }
+        } else {
+            startPredicateObjectList(subject);
+        }
+        out.print(" a ");
+        out.print(subjectOrObjectUri(classUrl));
+        out.println(" ;");
     }
 
     private String shorten(String uri, boolean predicate) {
-        if (uri.startsWith(this.ontologyUrl) && uri.length() > this.ontologyUrl.length()) {
-            return String.format("%s:%s", WriterVocabulary.T_ONTO_NS, uri.substring(this.ontologyUrl.length() + 1));
-        } else if (uri.startsWith(WriterVocabulary.T_RDF_NS_URI)) {
-            if (predicate && uri.equals(RDF_TYPE)) {
-                return "a";
-            } else {
-                return String.format("%s:%s", WriterVocabulary.T_RDF_NS,
-                        uri.substring(WriterVocabulary.T_RDF_NS_URI.length() + 1));
+        if (predicate && uri.equals(RDF_TYPE)) return "a";
+        
+        for (String nsUri : prefixes.keySet()) {
+            if (uri.startsWith(nsUri)) {
+                return String.format("%s:%s", prefixes.get(nsUri), uri.substring(nsUri.length()));
             }
-        } else if (uri.startsWith(WriterVocabulary.T_RDFS_NS_URI)) {
-            return String.format("%s:%s", WriterVocabulary.T_RDFS_NS,
-                    uri.substring(WriterVocabulary.T_RDFS_NS_URI.length() + 1));
-        } else if (uri.startsWith(WriterVocabulary.T_OWL_NS_URI)) {
-            return String.format("%s:%s", WriterVocabulary.T_OWL_NS,
-                    uri.substring(WriterVocabulary.T_OWL_NS_URI.length() + 1));
         }
 
         return null;
