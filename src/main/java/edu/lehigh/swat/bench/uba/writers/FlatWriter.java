@@ -5,7 +5,7 @@ import java.util.Stack;
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
-public abstract class NonNestedWriter extends AbstractWriter implements Writer {
+public abstract class FlatWriter extends AbstractWriter implements Writer {
 
     protected static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
     protected static final String OWL_ONTOLOGY = "http://www.w3.org/2002/07/owl#Ontology";
@@ -13,9 +13,8 @@ public abstract class NonNestedWriter extends AbstractWriter implements Writer {
     
     protected final String ontologyUrl;
     private final Stack<String> subjects = new Stack<String>();
-    private long nextId = 0;
 
-    public NonNestedWriter(GeneratorCallbackTarget target, String ontologyUrl) {
+    public FlatWriter(GeneratorCallbackTarget target, String ontologyUrl) {
         super(target);
         this.ontologyUrl = ontologyUrl;
     }

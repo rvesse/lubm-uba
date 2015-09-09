@@ -36,7 +36,7 @@ public class Launcher {
             "--seed" }, title = "Seed", arity = 1, description = "Seed used for random data generation (default 0)")
     private int seed = 0;
 
-    @Option(name = { "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format", allowedValues = { "OWL", "DAML", "NTRIPLES" })
+    @Option(name = { "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format", allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE" })
     private WriterType format = WriterType.OWL;
 
     @Option(name = { "--onto",

@@ -23,24 +23,6 @@ import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
 public abstract class RdfWriter extends AbstractWriter implements Writer {
-    /** abbreviation of univ-bench ontology namesapce */
-    static final String T_ONTO_NS = "ub";
-    /** prefix of univ-bench ontology namespace */
-    static final String T_ONTO_PREFIX = T_ONTO_NS + ":";
-    /** abbreviation of RDF namespace */
-    static final String T_RDF_NS = "rdf";
-    /** prefix of RDF namespace */
-    static final String T_RDF_PREFIX = T_RDF_NS + ":";
-    /** abbreviation of RDFS namespace */
-    static final String T_RDFS_NS = "rdfs";
-    /** prefix of RDFS namespace */
-    static final String T_RDFS_PREFIX = T_RDF_NS + ":";
-    /** string of "rdf:Id" */
-    static final String T_RDF_ID = T_RDF_PREFIX + "ID";
-    /** string of "rdf:about" */
-    static final String T_RDF_ABOUT = T_RDF_PREFIX + "about";
-    /** string of "rdf:resource */
-    static final String T_RDF_RES = T_RDF_PREFIX + "resource";
     /**
      * Creates a new RDF writer
      * 
@@ -63,7 +45,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         out.println(s);
 
         // Root rdf:RDF element
-        s = "<" + T_RDF_PREFIX + "RDF";
+        s = "<" + WriterVocabulary.T_RDF_PREFIX + "RDF";
         out.println(s);
         writeHeader();
 
@@ -74,7 +56,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
      */
     public void endFile() {
         String s;
-        s = "</" + T_RDF_PREFIX + "RDF>";
+        s = "</" + WriterVocabulary.T_RDF_PREFIX + "RDF>";
         out.println(s);
 
         cleanupOutputStream();
@@ -86,7 +68,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     public void startSection(int classType, String id) {
         callbackTarget.startSectionCB(classType);
         out.println();
-        String s = "<" + T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE + T_RDF_ABOUT + "=\"" + id + "\">";
+        String s = "<" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE + WriterVocabulary.T_RDF_ABOUT + "=\"" + id + "\">";
         out.println(s);
     }
 
@@ -96,7 +78,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     public void startAboutSection(int classType, String id) {
         callbackTarget.startAboutSectionCB(classType);
         out.println();
-        String s = "<" + T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE + T_RDF_ABOUT + "=\"" + id + "\">";
+        String s = "<" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE + WriterVocabulary.T_RDF_ABOUT + "=\"" + id + "\">";
         out.println(s);
     }
 
@@ -104,7 +86,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
      * Implementation of Writer:endSection.
      */
     public void endSection(int classType) {
-        String s = "</" + T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + ">";
+        String s = "</" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + ">";
         out.println(s);
     }
 
@@ -116,9 +98,9 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
 
         String s;
         if (isResource) {
-            s = "   <" + T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + T_SPACE + T_RDF_RES + "=\"" + value + "\" />";
+            s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + T_SPACE + WriterVocabulary.T_RDF_RES + "=\"" + value + "\" />";
         } else { // literal
-            s = "   <" + T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">" + value + "</" + T_ONTO_PREFIX
+            s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">" + value + "</" + WriterVocabulary.T_ONTO_PREFIX
                     + Ontology.PROP_TOKEN[property] + ">";
         }
 
@@ -133,9 +115,9 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         callbackTarget.addValueClassCB(valueClass);
 
         String s;
-        s = "   <" + T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">\n" + "      <" + T_ONTO_PREFIX
-                + Ontology.CLASS_TOKEN[valueClass] + T_SPACE + T_RDF_ABOUT + "=\"" + valueId + "\" />" + "   </"
-                + T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">";
+        s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">\n" + "      <" + WriterVocabulary.T_ONTO_PREFIX
+                + Ontology.CLASS_TOKEN[valueClass] + T_SPACE + WriterVocabulary.T_RDF_ABOUT + "=\"" + valueId + "\" />" + "   </"
+                + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">";
 
         out.println(s);
     }

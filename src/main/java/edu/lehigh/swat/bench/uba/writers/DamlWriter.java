@@ -22,11 +22,6 @@ package edu.lehigh.swat.bench.uba.writers;
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 
 public class DamlWriter extends RdfWriter {
-    /** abbreviation of DAML+OIL namesapce */
-    private static final String T_DAML_NS = "daml";
-    /** prefix of DAML+OIL namespace */
-    private static final String T_DAML_PREFIX = T_DAML_NS + ":";
-
     private final String ontology;
 
     /**
@@ -46,19 +41,19 @@ public class DamlWriter extends RdfWriter {
      */
     void writeHeader() {
         String s;
-        s = "xmlns:" + T_RDF_NS + "=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"";
+        s = "xmlns:" + WriterVocabulary.T_RDF_NS + "=\"" + WriterVocabulary.T_RDF_NS_URI + "\"";
         out.println(s);
-        s = "xmlns:" + T_RDFS_NS + "=\"http://www.w3.org/2000/01/rdf-schema#\"";
+        s = "xmlns:" + WriterVocabulary.T_RDFS_NS + "=\"" + WriterVocabulary.T_RDFS_NS_URI + "\"";
         out.println(s);
-        s = "xmlns:" + T_DAML_NS + "=\"http://www.daml.org/2001/03/daml+oil#\"";
+        s = "xmlns:" + WriterVocabulary.T_DAML_NS + "=\"" + WriterVocabulary.T_DAML_NS_URI + "\"";
         out.println(s);
-        s = "xmlns:" + T_ONTO_NS + "=\"" + ontology + "#\">";
+        s = "xmlns:" + WriterVocabulary.T_ONTO_NS + "=\"" + ontology + "#\">";
         out.println(s);
-        s = "<" + T_RDF_PREFIX + "Description " + T_RDF_ABOUT + "=\"\">";
+        s = "<" + WriterVocabulary.T_RDF_PREFIX + "Description " + WriterVocabulary.T_RDF_ABOUT + "=\"\">";
         out.println(s);
-        s = "<" + T_DAML_PREFIX + "imports " + T_RDF_RES + "=\"" + ontology + "\" />";
+        s = "<" + WriterVocabulary.T_DAML_PREFIX + "imports " + WriterVocabulary.T_RDF_RES + "=\"" + ontology + "\" />";
         out.println(s);
-        s = "</" + T_RDF_PREFIX + "Description>";
+        s = "</" + WriterVocabulary.T_RDF_PREFIX + "Description>";
         out.println(s);
     }
 }

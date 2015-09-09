@@ -12,6 +12,7 @@ import edu.lehigh.swat.bench.uba.model.PublicationInfo;
 import edu.lehigh.swat.bench.uba.writers.DamlWriter;
 import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
 import edu.lehigh.swat.bench.uba.writers.OwlWriter;
+import edu.lehigh.swat.bench.uba.writers.TurtleWriter;
 import edu.lehigh.swat.bench.uba.writers.Writer;
 
 public class UniversityState implements GeneratorCallbackTarget {
@@ -93,6 +94,9 @@ public class UniversityState implements GeneratorCallbackTarget {
         case NTRIPLES:
             writer = new NTriplesWriter(this, state.getOntologyUrl());
             break;
+        case TURTLE:
+            writer = new TurtleWriter(this, state.getOntologyUrl());
+            break;
         default:
             throw new RuntimeException("Invalid writer type specified");
         }
@@ -155,6 +159,9 @@ public class UniversityState implements GeneratorCallbackTarget {
             break;
         case NTRIPLES:
             fileName.append(".nt");
+            break;
+        case TURTLE:
+            fileName.append(".ttl");
             break;
         default:
             throw new RuntimeException("Unknown writer type");

@@ -3,7 +3,7 @@ package edu.lehigh.swat.bench.uba.writers;
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
-public class NTriplesWriter extends NonNestedWriter {
+public class NTriplesWriter extends FlatWriter {
     
     public NTriplesWriter(GeneratorCallbackTarget target, String ontologyUrl) {
         super(target, ontologyUrl);

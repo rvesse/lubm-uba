@@ -22,11 +22,6 @@ package edu.lehigh.swat.bench.uba.writers;
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 
 public class OwlWriter extends RdfWriter {
-    /** abbreviation of OWL namespace */
-    private static final String T_OWL_NS = "owl";
-    /** prefix of the OWL namespace */
-    private static final String T_OWL_PREFIX = T_OWL_NS + ":";
-    
     private final String ontology;
 
     /**
@@ -45,20 +40,20 @@ public class OwlWriter extends RdfWriter {
      */
     void writeHeader() {
         String s;
-        s = "xmlns:" + T_RDF_NS + "=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"";
+        s = "xmlns:" + WriterVocabulary.T_RDF_NS + "=\"" + WriterVocabulary.T_RDF_NS_URI + "\"";
         out.println(s);
-        s = "xmlns:" + T_RDFS_NS + "=\"http://www.w3.org/2000/01/rdf-schema#\"";
+        s = "xmlns:" + WriterVocabulary.T_RDFS_NS + "=\"" + WriterVocabulary.T_RDFS_NS_URI + "\"";
         out.println(s);
-        s = "xmlns:" + T_OWL_NS + "=\"http://www.w3.org/2002/07/owl#\"";
+        s = "xmlns:" + WriterVocabulary.T_OWL_NS + "=\"" + WriterVocabulary.T_OWL_NS_URI + "\"";
         out.println(s);
-        s = "xmlns:" + T_ONTO_NS + "=\"" + ontology + "#\">";
+        s = "xmlns:" + WriterVocabulary.T_ONTO_NS + "=\"" + ontology + "#\">";
         out.println(s);
         out.println("\n");
-        s = "<" + T_OWL_PREFIX + "Ontology " + T_RDF_ABOUT + "=\"\">";
+        s = "<" + WriterVocabulary.T_OWL_PREFIX + "Ontology " + WriterVocabulary.T_RDF_ABOUT + "=\"\">";
         out.println(s);
-        s = "<" + T_OWL_PREFIX + "imports " + T_RDF_RES + "=\"" + ontology + "\" />";
+        s = "<" + WriterVocabulary.T_OWL_PREFIX + "imports " + WriterVocabulary.T_RDF_RES + "=\"" + ontology + "\" />";
         out.println(s);
-        s = "</" + T_OWL_PREFIX + "Ontology>";
+        s = "</" + WriterVocabulary.T_OWL_PREFIX + "Ontology>";
         out.println(s);
     }
 }
