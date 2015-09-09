@@ -51,10 +51,14 @@ public class Generator {
      *            Generates DAML+OIL data if true, OWL data otherwise.
      * @param ontology
      *            Ontology url.
-     * @param compress 
+     * @param compress
+     *            Whether to compress output
+     * @param consolidate
+     *            Whether to consolidate output for each university into a
+     *            single file
      */
     public void start(int univNum, int startIndex, int seed, WriterType writerType, String ontology, String workDir,
-            boolean compress, int threads) {
+            boolean consolidate, boolean compress, int threads) {
         File outputDir = workDir != null ? new File(workDir) : new File(".");
         outputDir = outputDir.getAbsoluteFile();
         if (!outputDir.exists() || !outputDir.isDirectory()) {
@@ -63,7 +67,8 @@ public class Generator {
                         String.format("Unable to create requested output directory %s", outputDir));
             }
         }
-        GlobalState state = new GlobalState(univNum, seed, startIndex, ontology, writerType, outputDir, compress, threads);
+        GlobalState state = new GlobalState(univNum, seed, startIndex, ontology, writerType, outputDir, consolidate, compress,
+                threads);
 
         System.out.println("Started...");
 

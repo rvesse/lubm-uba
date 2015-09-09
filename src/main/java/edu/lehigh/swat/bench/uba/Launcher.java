@@ -74,6 +74,9 @@ public class Launcher {
     @Option(name = { "--compress" }, description = "When set output files are automatically compressed with GZip")
     private boolean compress = false;
     
+    @Option(name = { "--consolidate" }, description = "When set each university generates a single output file rather than an output file per university department")
+    private boolean consolidate = false;
+    
     @Option(name = { "--timing" }, description = "When set outputs the elapsed time at the end of the generation process")
     private boolean timing = false;
 
@@ -108,7 +111,7 @@ public class Launcher {
             Generator generator = new Generator();
             long start = System.currentTimeMillis();
             generator.start(launcher.univNum, launcher.startIndex, launcher.seed,
-                    launcher.format, launcher.ontology, launcher.workDir, launcher.compress, launcher.threads);
+                    launcher.format, launcher.ontology, launcher.workDir, launcher.consolidate, launcher.compress, launcher.threads);
             long elapsed = System.currentTimeMillis() - start;
             
             if (launcher.timing) {

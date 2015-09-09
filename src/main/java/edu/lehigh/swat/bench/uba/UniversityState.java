@@ -101,11 +101,11 @@ public class UniversityState implements GeneratorCallbackTarget {
             throw new RuntimeException("Invalid writer type specified");
         }
     }
-    
+
     public boolean hasCompleted() {
         return this.completed;
     }
-    
+
     public void setComplete() {
         this.completed = true;
     }
@@ -136,19 +136,21 @@ public class UniversityState implements GeneratorCallbackTarget {
 
     public String getDepartmentFilename(int deptIndex) {
         StringBuilder fileName = new StringBuilder();
-        
+
         // Base in output directory
         fileName.append(this.state.getOutputDirectory().getAbsolutePath());
         if (fileName.charAt(fileName.length() - 1) != File.separatorChar)
             fileName.append(File.separatorChar);
-        
+
         // University
         fileName.append(getName(Ontology.CS_C_UNIV, this.index));
-        fileName.append(Generator.INDEX_DELIMITER);
-        
-        // Department Index
-        fileName.append(deptIndex);
-        
+
+        if (!this.state.consolidateFiles()) {
+            // Department Index
+            fileName.append(Generator.INDEX_DELIMITER);
+            fileName.append(deptIndex);
+        }
+
         // Extension
         switch (this.state.getWriterType()) {
         case OWL:
@@ -166,12 +168,12 @@ public class UniversityState implements GeneratorCallbackTarget {
         default:
             throw new RuntimeException("Unknown writer type");
         }
-        
+
         // Compression?
         if (this.state.compressFiles()) {
             fileName.append(".gz");
         }
-        
+
         return fileName.toString();
     }
 
@@ -192,8 +194,7 @@ public class UniversityState implements GeneratorCallbackTarget {
             name = getRelativeName(classType, index);
             break;
         case Ontology.CS_C_DEPT:
-            name = getRelativeName(classType, index) + Generator.INDEX_DELIMITER
-                    + (this.getUniversityIndex());
+            name = getRelativeName(classType, index) + Generator.INDEX_DELIMITER + (this.getUniversityIndex());
             break;
         // NOTE: Assume departments with the same index share the same pool of
         // courses and researches
@@ -271,7 +272,7 @@ public class UniversityState implements GeneratorCallbackTarget {
 
         return email;
     }
-    
+
     /**
      * Gets the id of the specified instance.
      * 
@@ -290,8 +291,7 @@ public class UniversityState implements GeneratorCallbackTarget {
             break;
         case Ontology.CS_C_DEPT:
             id = "http://www." + getRelativeName(classType, index) + "."
-                    + getRelativeName(Ontology.CS_C_UNIV, this.getUniversityIndex())
-                    + ".edu";
+                    + getRelativeName(Ontology.CS_C_UNIV, this.getUniversityIndex()) + ".edu";
             break;
         default:
             id = getId(Ontology.CS_C_DEPT, this.instances[Ontology.CS_C_DEPT].count - 1) + Generator.ID_DELIMITER
@@ -492,23 +492,23 @@ public class UniversityState implements GeneratorCallbackTarget {
     public PropertyCount[] getProperties() {
         return this.properties;
     }
-    
+
     public ArrayList<PublicationInfo> getPublications() {
         return this.publications;
     }
-    
+
     public ArrayList<CourseInfo> getUndergradCourses() {
         return this.underCourses;
     }
-    
+
     public ArrayList<Integer> getRemainingUndergradCourses() {
         return this.remainingUnderCourses;
     }
-    
+
     public ArrayList<CourseInfo> getGradCourses() {
         return this.gradCourses;
     }
-    
+
     public ArrayList<Integer> getRemainingGradCourses() {
         return this.remainingGradCourses;
     }

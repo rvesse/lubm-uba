@@ -65,7 +65,9 @@ class UniversityGenerator implements Runnable {
      */
     private void _generateDept(UniversityState univState, int index) {
         String filename = univState.getDepartmentFilename(index);
-        univState.getWriter().startFile(filename);
+        if (index == 0 || !univState.getGlobalState().consolidateFiles()) {
+            univState.getWriter().startFile(filename);
+        }
 
         // reset
         univState.reset();
@@ -85,7 +87,11 @@ class UniversityGenerator implements Runnable {
         _generateCourses(univState);
         _generateRaTa(univState);
 
-        System.out.println(filename + " generated");
+        if (univState.getGlobalState().consolidateFiles()) {
+            System.out.println(filename + " in progress...");
+        } else {
+            System.out.println(filename + " generated");
+        }
         String bar = "";
         for (int i = 0; i < filename.length(); i++)
             bar += '-';
@@ -93,7 +99,12 @@ class UniversityGenerator implements Runnable {
         Generator.LOGGER.info(filename);
         Generator.LOGGER.info(bar);
         _generateComments(univState);
-        univState.getWriter().endFile();
+
+        if (!univState.getGlobalState().consolidateFiles()
+                || index == univState.getInstances()[Ontology.CS_C_DEPT].num - 1) {
+            System.out.println(filename + " generated");
+            univState.getWriter().endFile();
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////
