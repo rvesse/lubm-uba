@@ -57,7 +57,7 @@ public class Generator {
             boolean compress, int threads) {
         File outputDir = workDir != null ? new File(workDir) : new File(".");
         outputDir = outputDir.getAbsoluteFile();
-        if (!outputDir.exists()) {
+        if (!outputDir.exists() || !outputDir.isDirectory()) {
             if (!outputDir.mkdirs()) {
                 throw new IllegalArgumentException(
                         String.format("Unable to create requested output directory %s", outputDir));

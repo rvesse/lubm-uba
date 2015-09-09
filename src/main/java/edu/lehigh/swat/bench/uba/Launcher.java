@@ -1,12 +1,21 @@
 package edu.lehigh.swat.bench.uba;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.joda.time.Duration;
+import org.joda.time.Period;
+import org.joda.time.format.PeriodFormat;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
+import org.slf4j.LoggerFactory;
 
 import com.github.rvesse.airline.Command;
 import com.github.rvesse.airline.HelpOption;
@@ -23,6 +32,8 @@ public class Launcher {
 
     /** name of the log file */
     private static final String DEFAULT_LOG_FILE = "log.txt";
+    
+    private static final String DEFAULT_ONTOLOGY_URL = "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl";
 
     @Option(name = { "-u",
             "--univ" }, title = "NumberOfUniversities", arity = 1, description = "Sets the number of universities to generate data for (default 1)")
@@ -36,23 +47,23 @@ public class Launcher {
             "--seed" }, title = "Seed", arity = 1, description = "Seed used for random data generation (default 0)")
     private int seed = 0;
 
-    @Option(name = { "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format", allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE" })
+    @Option(name = { "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format (default OWL)", allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE" })
     private WriterType format = WriterType.OWL;
 
     @Option(name = { "--onto",
-            "--ontology" }, title = "OntologyUrl", description = "URL for the benchmark ontology used as the base URL in the generated data (default http://swat.cse.lehigh.edu/onto/univ-bench.owl)")
+            "--ontology" }, title = "OntologyUrl", description = "URL for the benchmark ontology used as the base URL in the generated data (default " + DEFAULT_ONTOLOGY_URL + ")")
     private String ontology = "http://swat.cse.lehigh.edu/onto/univ-bench.owl";
 
     @Option(name = { "-o",
-            "--output" }, title = "OutputDirectory", description = "Sets the output directory to which generated files are written")
+            "--output" }, title = "OutputDirectory", description = "Sets the output directory to which generated files are written (defaults to working directory)")
     private String workDir = null;
 
     @Option(name = { "-l",
-            "--log" }, title = "LogFile", description = "Sets the log file (default log.txt in working directory)")
+            "--log" }, title = "LogFile", description = "Sets the log file (default " + DEFAULT_LOG_FILE + ")")
     private String logFile;
 
     @Option(name = {
-            "--log-pattern" }, title = "LogPattern", description = "Provides a log4j log pattern used for the log file (default to "
+            "--log-pattern" }, title = "LogPattern", description = "Provides a log4j log pattern used for the log file (default "
                     + PatternLayout.TTCC_CONVERSION_PATTERN + ")")
     private String logPattern = null;
 
@@ -62,6 +73,9 @@ public class Launcher {
     
     @Option(name = { "--compress" }, description = "When set output files are automatically compressed with GZip")
     private boolean compress = false;
+    
+    @Option(name = { "--timing" }, description = "When set outputs the elapsed time at the end of the generation process")
+    private boolean timing = false;
 
     @Inject
     private HelpOption help;
@@ -92,8 +106,19 @@ public class Launcher {
 
             // Run the generator
             Generator generator = new Generator();
+            long start = System.currentTimeMillis();
             generator.start(launcher.univNum, launcher.startIndex, launcher.seed,
                     launcher.format, launcher.ontology, launcher.workDir, launcher.compress, launcher.threads);
+            long elapsed = System.currentTimeMillis() - start;
+            
+            if (launcher.timing) {
+                Duration duration = Duration.millis(elapsed);
+                System.out.print("Took ");
+                System.out.print(PeriodFormat.getDefault().print(duration.toPeriod()));
+                System.out.println(" to generate data");
+                org.slf4j.Logger log = LoggerFactory.getLogger(Launcher.class);
+                log.info("Took {} to generate data", PeriodFormat.getDefault().print(duration.toPeriod()));
+            }
 
         } catch (ParseException e) {
             System.err.println(e.getMessage());
