@@ -16,7 +16,7 @@
     <jdk.minimum>1.7</jdk.minimum>
 
     <!-- Dependency Versions -->
-    <dependency.airline.version>1.0.1</dependency.airline.version>
+    <dependency.airline.version>2.0.0</dependency.airline.version>
     <dependency.joda-time.version>2.8.2</dependency.joda-time.version>
     <dependency.log4j.version>1.2.17</dependency.log4j.version>
     <dependency.slf4j.version>1.7.12</dependency.slf4j.version>

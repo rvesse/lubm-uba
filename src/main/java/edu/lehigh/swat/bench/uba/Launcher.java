@@ -1,38 +1,34 @@
 package edu.lehigh.swat.bench.uba;
 
-import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.joda.time.Duration;
-import org.joda.time.Period;
 import org.joda.time.format.PeriodFormat;
-import org.joda.time.format.PeriodFormatter;
-import org.joda.time.format.PeriodFormatterBuilder;
 import org.slf4j.LoggerFactory;
 
-import com.github.rvesse.airline.Command;
+import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.HelpOption;
-import com.github.rvesse.airline.Option;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.annotations.help.ExitCodes;
+import com.github.rvesse.airline.annotations.restrictions.AllowedRawValues;
 import com.github.rvesse.airline.SingleCommand;
-import com.github.rvesse.airline.parser.ParseException;
+import com.github.rvesse.airline.parser.errors.ParseException;
 
 import edu.lehigh.swat.bench.uba.writers.WriterType;
 
-@Command(name = "generate.sh", description = "Artificial Data Generator for the Lehigh University Benchmark (LUBM) for SPARQL query engines", exitCodes = {
-        0, 1, 2, 3 }, exitDescriptions = { "Data was generated successfully", "Help was displayed", "Invalid arguments",
-                "Error during data generation" })
+@Command(name = "generate.sh", description = "Artificial Data Generator for the Lehigh University Benchmark (LUBM) for SPARQL query engines")
+@ExitCodes(codes = { 0, 1, 2, 3 }, descriptions = { "Data was generated successfully", "Help was displayed",
+        "Invalid arguments", "Error during data generation" })
 public class Launcher {
 
     /** name of the log file */
     private static final String DEFAULT_LOG_FILE = "log.txt";
-    
+
     private static final String DEFAULT_ONTOLOGY_URL = "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl";
 
     @Option(name = { "-u",
@@ -47,19 +43,22 @@ public class Launcher {
             "--seed" }, title = "Seed", arity = 1, description = "Seed used for random data generation (default 0)")
     private int seed = 0;
 
-    @Option(name = { "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format (default OWL)", allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE" })
+    @Option(name = {
+            "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format (default OWL)")
+    @AllowedRawValues(allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE" })
     private WriterType format = WriterType.OWL;
 
     @Option(name = { "--onto",
-            "--ontology" }, title = "OntologyUrl", description = "URL for the benchmark ontology used as the base URL in the generated data (default " + DEFAULT_ONTOLOGY_URL + ")")
+            "--ontology" }, title = "OntologyUrl", description = "URL for the benchmark ontology used as the base URL in the generated data (default "
+                    + DEFAULT_ONTOLOGY_URL + ")")
     private String ontology = "http://swat.cse.lehigh.edu/onto/univ-bench.owl";
 
     @Option(name = { "-o",
             "--output" }, title = "OutputDirectory", description = "Sets the output directory to which generated files are written (defaults to working directory)")
     private String workDir = null;
 
-    @Option(name = { "-l",
-            "--log" }, title = "LogFile", description = "Sets the log file (default " + DEFAULT_LOG_FILE + ")")
+    @Option(name = { "-l", "--log" }, title = "LogFile", description = "Sets the log file (default " + DEFAULT_LOG_FILE
+            + ")")
     private String logFile;
 
     @Option(name = {
@@ -70,18 +69,20 @@ public class Launcher {
     @Option(name = { "-t",
             "--threads" }, title = "NumThreads", arity = 1, description = "Sets the number of threads to use for data generation (default 1) which can speed up generating data for larger numbers of universities")
     private int threads = 1;
-    
+
     @Option(name = { "--compress" }, description = "When set output files are automatically compressed with GZip")
     private boolean compress = false;
-    
-    @Option(name = { "--consolidate" }, description = "When set each university generates a single output file rather than an output file per university department")
+
+    @Option(name = {
+            "--consolidate" }, description = "When set each university generates a single output file rather than an output file per university department")
     private boolean consolidate = false;
-    
-    @Option(name = { "--timing" }, description = "When set outputs the elapsed time at the end of the generation process")
+
+    @Option(name = {
+            "--timing" }, description = "When set outputs the elapsed time at the end of the generation process")
     private boolean timing = false;
 
     @Inject
-    private HelpOption help;
+    private HelpOption<Launcher> help;
 
     public static void main(String[] args) {
         SingleCommand<Launcher> parser = SingleCommand.singleCommand(Launcher.class);
@@ -110,10 +111,10 @@ public class Launcher {
             // Run the generator
             Generator generator = new Generator();
             long start = System.currentTimeMillis();
-            generator.start(launcher.univNum, launcher.startIndex, launcher.seed,
-                    launcher.format, launcher.ontology, launcher.workDir, launcher.consolidate, launcher.compress, launcher.threads);
+            generator.start(launcher.univNum, launcher.startIndex, launcher.seed, launcher.format, launcher.ontology,
+                    launcher.workDir, launcher.consolidate, launcher.compress, launcher.threads);
             long elapsed = System.currentTimeMillis() - start;
-            
+
             if (launcher.timing) {
                 Duration duration = Duration.millis(elapsed);
                 System.out.print("Took ");
