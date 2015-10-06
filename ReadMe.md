@@ -15,6 +15,8 @@ Data Generator for the LUBM Benchmark, this is basically the official code for t
         - Added `--compress` option which compresses output files with GZip as they are generated
         - Added `--consolidate` option which produces a single file per university rather than a file per university department.  This avoids issues with excessive numbers of files being generated for larger numbers of universities.
         - Added `-t <threads>`/`--threads <threads>` option to allow parallel data generation for better performance
+        - Added `--quiet` option to reduce logging verbosity
+        - Added `--max-time <minutes>` option to specify the maximum amount of time to allow data generation to run for
 - Build Changes
     - Now requires Java 1.7
     - `pom.xml` and changed directory structure to be able to build with Maven

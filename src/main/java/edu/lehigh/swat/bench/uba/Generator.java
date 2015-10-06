@@ -51,16 +51,26 @@ public class Generator {
      *            Generates DAML+OIL data if true, OWL data otherwise.
      * @param ontology
      *            Ontology url.
+     * @param workDir
+     *            The working directory where generated files should be written
      * @param compress
      *            Whether to compress output
      * @param consolidate
      *            Whether to consolidate output for each university into a
      *            single file
+     * @param threads
+     *            The number of threads to use for data generation
+     * @param executionTimeout
+     *            The maximum amount of time to wait for data generation to
+     *            complete before aborting it
+     * @param executionTimeoutUnit
+     *            The time unit in which {@code executionTimeout} is expressed
      * @param quiet
      *            Whether to enable quiet mode
      */
     public void start(int univNum, int startIndex, int seed, WriterType writerType, String ontology, String workDir,
-            boolean consolidate, boolean compress, int threads, boolean quiet) {
+            boolean consolidate, boolean compress, int threads, long executionTimeout, TimeUnit executionTimeoutUnit,
+            boolean quiet) {
         File outputDir = workDir != null ? new File(workDir) : new File(".");
         outputDir = outputDir.getAbsoluteFile();
         if (!outputDir.exists() || !outputDir.isDirectory()) {
@@ -70,7 +80,7 @@ public class Generator {
             }
         }
         GlobalState state = new GlobalState(univNum, seed, startIndex, ontology, writerType, outputDir, consolidate,
-                compress, threads, quiet);
+                compress, threads, executionTimeout, executionTimeoutUnit, quiet);
 
         System.out.println("Started...");
 
@@ -84,7 +94,9 @@ public class Generator {
         }
         try {
             state.getExecutor().shutdown();
-            if (!state.getExecutor().awaitTermination(3, TimeUnit.HOURS)) {
+            if (!state.getExecutor().awaitTermination(state.getExecutionTimeout(), state.getExecutionTimeoutUnit())) {
+                // Force remaining threads to shut down
+                state.getExecutor().shutdownNow();
                 throw new RuntimeException("Timeout was exceeded");
             }
         } catch (InterruptedException e) {

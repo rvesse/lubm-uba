@@ -1,5 +1,7 @@
 package edu.lehigh.swat.bench.uba;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +35,8 @@ public class Launcher {
     private static final String DEFAULT_LOG_FILE = "log.txt";
 
     private static final String DEFAULT_ONTOLOGY_URL = "http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl";
+
+    private static final long DEFAULT_TIMEOUT = 180;
 
     @Option(name = { "-u",
             "--univ" }, title = "NumberOfUniversities", arity = 1, description = "Sets the number of universities to generate data for (default 1)")
@@ -89,9 +93,13 @@ public class Launcher {
     @Option(name = {
             "--timing" }, description = "When set outputs the elapsed time at the end of the generation process")
     private boolean timing = false;
-    
-    @Option(name = { "-q", "--quiet" }, description = "When set reduces the amount of logging that is generated to both stdout and the log file")
+
+    @Option(name = { "-q",
+            "--quiet" }, description = "When set reduces the amount of logging that is generated to both stdout and the log file")
     private boolean quiet = false;
+
+    @Option(name = { "--max-time" }, title = "Minutes", arity = 1, description = "The maximum amount of time (expressed in minutes) to allow data generation to run before aborting the process (default is " + DEFAULT_TIMEOUT + ")")
+    private long timeout = DEFAULT_TIMEOUT;
 
     @Inject
     private HelpOption<Launcher> help;
@@ -125,7 +133,8 @@ public class Launcher {
             Generator generator = new Generator();
             long start = System.currentTimeMillis();
             generator.start(launcher.univNum, launcher.startIndex, launcher.seed, launcher.format, launcher.ontology,
-                    launcher.workDir, launcher.consolidate, launcher.compress, launcher.threads, launcher.quiet);
+                    launcher.workDir, launcher.consolidate, launcher.compress, launcher.threads, launcher.timeout,
+                    TimeUnit.MINUTES, launcher.quiet);
             long elapsed = System.currentTimeMillis() - start;
 
             if (launcher.timing) {

@@ -3,6 +3,7 @@ package edu.lehigh.swat.bench.uba;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import edu.lehigh.swat.bench.uba.model.Ontology;
@@ -29,9 +30,11 @@ public class GlobalState {
     private final boolean compress, consolidate, quiet;
 
     private final ExecutorService executorService;
+    private final long executionTimeout;
+    private final TimeUnit executionTimeoutUnit;
 
     public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir,
-            boolean consolidate, boolean compress, int threads, boolean quiet) {
+            boolean consolidate, boolean compress, int threads, long executionTimeout, TimeUnit executionTimeoutUnit, boolean quiet) {
         this.numUniversities = univNum;
         this.baseSeed = baseSeed;
         this.startIndex = startIndex;
@@ -41,6 +44,8 @@ public class GlobalState {
         this.consolidate = consolidate;
         this.compress = compress;
         this.quiet = quiet;
+        this.executionTimeout = executionTimeout;
+        this.executionTimeoutUnit = executionTimeoutUnit;
 
         this.totalInstancesGenerated = new AtomicLong[Ontology.CLASS_NUM];
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
@@ -96,6 +101,14 @@ public class GlobalState {
 
     public ExecutorService getExecutor() {
         return this.executorService;
+    }
+    
+    public long getExecutionTimeout() {
+        return this.executionTimeout;
+    }
+    
+    public TimeUnit getExecutionTimeoutUnit() {
+        return this.executionTimeoutUnit;
     }
 
     public void incrementTotalInstances(int classType) {
