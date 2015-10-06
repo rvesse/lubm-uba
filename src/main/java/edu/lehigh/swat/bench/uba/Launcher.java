@@ -16,6 +16,8 @@ import com.github.rvesse.airline.HelpOption;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.help.ExitCodes;
 import com.github.rvesse.airline.annotations.restrictions.AllowedRawValues;
+import com.github.rvesse.airline.annotations.restrictions.NotBlank;
+import com.github.rvesse.airline.annotations.restrictions.ranges.IntegerRange;
 import com.github.rvesse.airline.SingleCommand;
 import com.github.rvesse.airline.parser.errors.ParseException;
 
@@ -33,10 +35,12 @@ public class Launcher {
 
     @Option(name = { "-u",
             "--univ" }, title = "NumberOfUniversities", arity = 1, description = "Sets the number of universities to generate data for (default 1)")
+    @IntegerRange(min = 1, minInclusive = true)
     private int univNum = 1;
 
     @Option(name = { "-i",
             "--index" }, title = "StartingIndex", arity = 1, description = "Starting index of the universities (default 0)")
+    @IntegerRange(min = 0, minInclusive = true)
     private int startIndex = 0;
 
     @Option(name = { "-s",
@@ -51,14 +55,17 @@ public class Launcher {
     @Option(name = { "--onto",
             "--ontology" }, title = "OntologyUrl", description = "URL for the benchmark ontology used as the base URL in the generated data (default "
                     + DEFAULT_ONTOLOGY_URL + ")")
+    @NotBlank
     private String ontology = "http://swat.cse.lehigh.edu/onto/univ-bench.owl";
 
     @Option(name = { "-o",
             "--output" }, title = "OutputDirectory", description = "Sets the output directory to which generated files are written (defaults to working directory)")
+    @NotBlank
     private String workDir = null;
 
     @Option(name = { "-l", "--log" }, title = "LogFile", description = "Sets the log file (default " + DEFAULT_LOG_FILE
             + ")")
+    @NotBlank
     private String logFile;
 
     @Option(name = {
@@ -68,6 +75,7 @@ public class Launcher {
 
     @Option(name = { "-t",
             "--threads" }, title = "NumThreads", arity = 1, description = "Sets the number of threads to use for data generation (default 1) which can speed up generating data for larger numbers of universities")
+    @IntegerRange(min = 1, max = 128)
     private int threads = 1;
 
     @Option(name = { "--compress" }, description = "When set output files are automatically compressed with GZip")
