@@ -88,7 +88,8 @@ class UniversityGenerator implements Runnable {
         _generateRaTa(univState);
 
         if (univState.getGlobalState().consolidateFiles()) {
-            System.out.println(filename + " in progress...");
+            if (!univState.getGlobalState().isQuietMode())
+                System.out.println(filename + " in progress...");
         } else {
             System.out.println(filename + " generated");
         }
@@ -699,13 +700,13 @@ class UniversityGenerator implements Runnable {
                              // department
         long totalPropInstNum = 0l; // total property instance num so far
 
-        Generator.LOGGER.info("External Seed={} Interal Seed={}", univState.getGlobalState().getBaseSeed(),
+        Generator.LOGGER.debug("External Seed={} Interal Seed={}", univState.getGlobalState().getBaseSeed(),
                 univState.getSeed());
 
         Generator.LOGGER.info("CLASS INSTANCE# (TOTAL-SO-FAR)");
         Generator.LOGGER.info("----------------------------");
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
-            Generator.LOGGER.info("{} {} ({})", Ontology.CLASS_TOKEN[i], univState.getInstances()[i].logNum,
+            Generator.LOGGER.debug("{} {} ({})", Ontology.CLASS_TOKEN[i], univState.getInstances()[i].logNum,
                     univState.getGlobalState().getTotalInstances(i));
             classInstNum += univState.getInstances()[i].logNum;
             totalClassInstNum += univState.getGlobalState().getTotalInstances(i);
@@ -717,7 +718,7 @@ class UniversityGenerator implements Runnable {
         Generator.LOGGER.info("PROPERTY INSTANCE# (TOTAL-SO-FAR)");
         Generator.LOGGER.info("-------------------------------");
         for (int i = 0; i < Ontology.PROP_NUM; i++) {
-            Generator.LOGGER.info("{} {} ({})", Ontology.PROP_TOKEN[i], univState.getProperties()[i].logNum,
+            Generator.LOGGER.debug("{} {} ({})", Ontology.PROP_TOKEN[i], univState.getProperties()[i].logNum,
                     univState.getGlobalState().getTotalProperties(i));
             propInstNum += univState.getProperties()[i].logNum;
             totalPropInstNum += univState.getGlobalState().getTotalProperties(i);
@@ -725,9 +726,11 @@ class UniversityGenerator implements Runnable {
         Generator.LOGGER.info("TOTAL: {}", propInstNum);
         Generator.LOGGER.info("TOTAL SO FAR: {}", totalPropInstNum);
 
-        System.out.println("CLASS INSTANCE #: " + classInstNum + ", TOTAL SO FAR: " + totalClassInstNum);
-        System.out.println("PROPERTY INSTANCE #: " + propInstNum + ", TOTAL SO FAR: " + totalPropInstNum);
-        System.out.println();
+        if (!univState.getGlobalState().isQuietMode()) {
+            System.out.println("CLASS INSTANCE #: " + classInstNum + ", TOTAL SO FAR: " + totalClassInstNum);
+            System.out.println("PROPERTY INSTANCE #: " + propInstNum + ", TOTAL SO FAR: " + totalPropInstNum);
+            System.out.println();
+        }
 
     }
 

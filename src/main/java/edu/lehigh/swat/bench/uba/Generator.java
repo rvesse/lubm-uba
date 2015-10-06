@@ -56,9 +56,11 @@ public class Generator {
      * @param consolidate
      *            Whether to consolidate output for each university into a
      *            single file
+     * @param quiet
+     *            Whether to enable quiet mode
      */
     public void start(int univNum, int startIndex, int seed, WriterType writerType, String ontology, String workDir,
-            boolean consolidate, boolean compress, int threads) {
+            boolean consolidate, boolean compress, int threads, boolean quiet) {
         File outputDir = workDir != null ? new File(workDir) : new File(".");
         outputDir = outputDir.getAbsoluteFile();
         if (!outputDir.exists() || !outputDir.isDirectory()) {
@@ -67,8 +69,8 @@ public class Generator {
                         String.format("Unable to create requested output directory %s", outputDir));
             }
         }
-        GlobalState state = new GlobalState(univNum, seed, startIndex, ontology, writerType, outputDir, consolidate, compress,
-                threads);
+        GlobalState state = new GlobalState(univNum, seed, startIndex, ontology, writerType, outputDir, consolidate,
+                compress, threads, quiet);
 
         System.out.println("Started...");
 

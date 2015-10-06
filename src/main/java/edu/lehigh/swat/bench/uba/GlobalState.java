@@ -9,7 +9,7 @@ import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
 
 public class GlobalState {
-    
+
     private final int numUniversities;
 
     /** user specified seed for the data generation */
@@ -26,11 +26,12 @@ public class GlobalState {
 
     private final WriterType writerType;
     private final File outputDir;
-    private final boolean compress, consolidate;
-    
+    private final boolean compress, consolidate, quiet;
+
     private final ExecutorService executorService;
-    
-    public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir, boolean consolidate, boolean compress, int threads) {
+
+    public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir,
+            boolean consolidate, boolean compress, int threads, boolean quiet) {
         this.numUniversities = univNum;
         this.baseSeed = baseSeed;
         this.startIndex = startIndex;
@@ -39,6 +40,7 @@ public class GlobalState {
         this.outputDir = outputDir;
         this.consolidate = consolidate;
         this.compress = compress;
+        this.quiet = quiet;
 
         this.totalInstancesGenerated = new AtomicLong[Ontology.CLASS_NUM];
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
@@ -48,7 +50,7 @@ public class GlobalState {
         for (int i = 0; i < Ontology.PROP_NUM; i++) {
             this.totalPropertiesGenerated[i] = new AtomicLong(0l);
         }
-        
+
         if (threads <= 1) {
             this.executorService = Executors.newSingleThreadExecutor();
         } else {
@@ -63,7 +65,7 @@ public class GlobalState {
     public String getOntologyUrl() {
         return this.ontology;
     }
-    
+
     public int getNumberUniversities() {
         return this.numUniversities;
     }
@@ -75,35 +77,39 @@ public class GlobalState {
     public WriterType getWriterType() {
         return this.writerType;
     }
-    
+
     public File getOutputDirectory() {
         return this.outputDir;
     }
-    
+
     public boolean compressFiles() {
         return this.compress;
     }
-    
+
     public boolean consolidateFiles() {
         return this.consolidate;
     }
-    
+
+    public boolean isQuietMode() {
+        return this.quiet;
+    }
+
     public ExecutorService getExecutor() {
         return this.executorService;
     }
-    
+
     public void incrementTotalInstances(int classType) {
         this.totalInstancesGenerated[classType].incrementAndGet();
     }
-    
+
     public void incrementTotalProperties(int propType) {
         this.totalPropertiesGenerated[propType].incrementAndGet();
     }
-    
+
     public long getTotalInstances(int classType) {
         return this.totalInstancesGenerated[classType].get();
     }
-    
+
     public long getTotalProperties(int propType) {
         return this.totalPropertiesGenerated[propType].get();
     }

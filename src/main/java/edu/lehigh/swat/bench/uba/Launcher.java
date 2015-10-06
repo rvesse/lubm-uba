@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.joda.time.Duration;
@@ -88,6 +89,9 @@ public class Launcher {
     @Option(name = {
             "--timing" }, description = "When set outputs the elapsed time at the end of the generation process")
     private boolean timing = false;
+    
+    @Option(name = { "-q", "--quiet" }, description = "When set reduces the amount of logging that is generated to both stdout and the log file")
+    private boolean quiet = false;
 
     @Inject
     private HelpOption<Launcher> help;
@@ -105,6 +109,7 @@ public class Launcher {
             // Configure logging
             BasicConfigurator.configure();
             Logger.getRootLogger().removeAllAppenders();
+            Logger.getRootLogger().setLevel(launcher.quiet ? Level.INFO : Level.DEBUG);
             if (launcher.logFile == null) {
                 launcher.logFile = DEFAULT_LOG_FILE;
             }
@@ -120,7 +125,7 @@ public class Launcher {
             Generator generator = new Generator();
             long start = System.currentTimeMillis();
             generator.start(launcher.univNum, launcher.startIndex, launcher.seed, launcher.format, launcher.ontology,
-                    launcher.workDir, launcher.consolidate, launcher.compress, launcher.threads);
+                    launcher.workDir, launcher.consolidate, launcher.compress, launcher.threads, launcher.quiet);
             long elapsed = System.currentTimeMillis() - start;
 
             if (launcher.timing) {
