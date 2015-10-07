@@ -54,4 +54,6 @@ For more information about the benchmark, visit its [homepage](http://www.lehigh
 
 ### This Repository
 
-You can file issues against this repository if they are specific to this version of the data generator.  While the generator here may differ from the original any changes have been done and verified such that the data generated remains identical.
+You can file issues against this repository if they are specific to this version of the data generator.  While the generator here differs substantially from the original **all** changes have been implemented such that the data generated remains identical.
+
+The provided  `compareOutput.sh` script in this repository will generate data using the original code plus the rewritten code (using a variety of supported modes and output formats) and verifies that the generated data is identical.
