@@ -189,6 +189,8 @@ public class GlobalState {
                     this.consolidatedOutput.flush();
                     this.consolidatedOutput.close();
                 }
+                
+                System.out.println(String.format("Universities%s%s generated", getFileExtension(), this.compress ? ".gz" : ""));
             } catch (IOException e) {
                 throw new RuntimeException("Error finishing consolidated output file", e);
             }

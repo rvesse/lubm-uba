@@ -65,9 +65,9 @@ class UniversityGenerator implements Runnable {
      *            is invoked.
      */
     private void _generateDept(UniversityState univState, int index) {
-        String filename = univState.getFilename(index);
         // Start a new file if we're not consolidating or this is the first
         // department for the university
+        String filename = univState.getFilename(index);
         if (index == 0 || univState.getGlobalState().consolidationMode() == ConsolidationMode.None) {
             univState.getWriter().startFile(filename, univState.getGlobalState());
         }
@@ -94,9 +94,6 @@ class UniversityGenerator implements Runnable {
             // Consolidating output so file is not yet complete
             if (!univState.getGlobalState().isQuietMode())
                 System.out.println(filename + " in progress...");
-        } else {
-            // Not consolidating so file is complete
-            System.out.println(filename + " generated");
         }
         String bar = "";
         for (int i = 0; i < filename.length(); i++)
@@ -110,7 +107,12 @@ class UniversityGenerator implements Runnable {
         // the university
         if (univState.getGlobalState().consolidationMode() == ConsolidationMode.None
                 || index == univState.getInstances()[Ontology.CS_C_DEPT].num - 1) {
-            System.out.println(filename + " generated");
+            if (univState.getGlobalState().consolidationMode() != ConsolidationMode.Full) {
+                System.out.println(filename + " generated");
+            } else {
+                // Consolidating output so file is not yet complete
+                System.out.println(filename + " (University " + univState.getUniversityIndex() + ") in progress...");
+            }
             univState.getWriter().endFile(univState.getGlobalState());
         }
     }
