@@ -20,6 +20,7 @@
 package edu.lehigh.swat.bench.uba.writers;
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
+import edu.lehigh.swat.bench.uba.GlobalState;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
 public abstract class RdfWriter extends AbstractWriter implements Writer {
@@ -36,9 +37,9 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     /**
      * Implementation of Writer:startFile.
      */
-    public void startFile(String fileName) {
+    public void startFile(String fileName, GlobalState state) {
         String s;
-        prepareOutputStream(fileName);
+        prepareOutputStream(fileName, state);
 
         // XML header
         s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
@@ -54,7 +55,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     /**
      * Implementation of Writer:endFile.
      */
-    public void endFile() {
+    public void endFile(GlobalState state) {
         String s;
         s = "</" + WriterVocabulary.T_RDF_PREFIX + "RDF>";
         out.println(s);

@@ -24,6 +24,7 @@ import com.github.rvesse.airline.annotations.restrictions.ranges.IntegerRange;
 import com.github.rvesse.airline.SingleCommand;
 import com.github.rvesse.airline.parser.errors.ParseException;
 
+import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
 
 @Command(name = "generate.sh", description = "Artificial Data Generator for the Lehigh University Benchmark (LUBM) for SPARQL query engines")
@@ -87,8 +88,9 @@ public class Launcher {
     private boolean compress = false;
 
     @Option(name = {
-            "--consolidate" }, description = "When set each university generates a single output file rather than an output file per university department")
-    private boolean consolidate = false;
+            "--consolidate" }, arity = 1, description = "When set controls how many data files are generated and what data is placed into each file.  This defaults to None which produces one file per university department, Partial produces one file per university and Full produces a single file.")
+    @AllowedRawValues(allowedValues = { "None", "Partial", "Full" })
+    private ConsolidationMode consolidate = ConsolidationMode.None;
 
     @Option(name = {
             "--timing" }, description = "When set outputs the elapsed time at the end of the generation process")
@@ -98,7 +100,9 @@ public class Launcher {
             "--quiet" }, description = "When set reduces the amount of logging that is generated to both stdout and the log file")
     private boolean quiet = false;
 
-    @Option(name = { "--max-time" }, title = "Minutes", arity = 1, description = "The maximum amount of time (expressed in minutes) to allow data generation to run before aborting the process (default is " + DEFAULT_TIMEOUT + ")")
+    @Option(name = {
+            "--max-time" }, title = "Minutes", arity = 1, description = "The maximum amount of time (expressed in minutes) to allow data generation to run before aborting the process (default is "
+                    + DEFAULT_TIMEOUT + ")")
     private long timeout = DEFAULT_TIMEOUT;
 
     @Inject

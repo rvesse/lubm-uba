@@ -3,6 +3,7 @@ package edu.lehigh.swat.bench.uba.writers;
 import java.util.Stack;
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
+import edu.lehigh.swat.bench.uba.GlobalState;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
 public abstract class FlatWriter extends AbstractWriter implements Writer {
@@ -20,8 +21,8 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
     }
 
     @Override
-    public void startFile(String fileName) {
-        prepareOutputStream(fileName);
+    public void startFile(String fileName, GlobalState state) {
+        prepareOutputStream(fileName, state);
         addOntologyDeclaration();
     }
 
@@ -34,7 +35,7 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
     }
 
     @Override
-    public void endFile() {
+    public void endFile(GlobalState state) {
         if (!subjects.isEmpty())
             throw new RuntimeException("Mismatched calls to writer in endFile()");
         cleanupOutputStream();

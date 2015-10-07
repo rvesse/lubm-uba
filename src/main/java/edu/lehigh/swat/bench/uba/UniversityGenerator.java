@@ -13,6 +13,7 @@ import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.model.PublicationInfo;
 import edu.lehigh.swat.bench.uba.model.RaInfo;
 import edu.lehigh.swat.bench.uba.model.TaInfo;
+import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 
 class UniversityGenerator implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(UniversityGenerator.class);
@@ -64,9 +65,11 @@ class UniversityGenerator implements Runnable {
      *            is invoked.
      */
     private void _generateDept(UniversityState univState, int index) {
-        String filename = univState.getDepartmentFilename(index);
-        if (index == 0 || !univState.getGlobalState().consolidateFiles()) {
-            univState.getWriter().startFile(filename);
+        String filename = univState.getFilename(index);
+        // Start a new file if we're not consolidating or this is the first
+        // department for the university
+        if (index == 0 || univState.getGlobalState().consolidationMode() == ConsolidationMode.None) {
+            univState.getWriter().startFile(filename, univState.getGlobalState());
         }
 
         // reset
@@ -87,10 +90,12 @@ class UniversityGenerator implements Runnable {
         _generateCourses(univState);
         _generateRaTa(univState);
 
-        if (univState.getGlobalState().consolidateFiles()) {
+        if (univState.getGlobalState().consolidationMode() != ConsolidationMode.None) {
+            // Consolidating output so file is not yet complete
             if (!univState.getGlobalState().isQuietMode())
                 System.out.println(filename + " in progress...");
         } else {
+            // Not consolidating so file is complete
             System.out.println(filename + " generated");
         }
         String bar = "";
@@ -101,10 +106,12 @@ class UniversityGenerator implements Runnable {
         Generator.LOGGER.info(bar);
         _generateComments(univState);
 
-        if (!univState.getGlobalState().consolidateFiles()
+        // End the file if we aren't consolidating or this is the last file for
+        // the university
+        if (univState.getGlobalState().consolidationMode() == ConsolidationMode.None
                 || index == univState.getInstances()[Ontology.CS_C_DEPT].num - 1) {
             System.out.println(filename + " generated");
-            univState.getWriter().endFile();
+            univState.getWriter().endFile(univState.getGlobalState());
         }
     }
 

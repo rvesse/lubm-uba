@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
+import edu.lehigh.swat.bench.uba.GlobalState;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 
 public class TurtleWriter extends FlatWriter {
@@ -16,8 +17,8 @@ public class TurtleWriter extends FlatWriter {
     }
 
     @Override
-    public void startFile(String fileName) {
-        prepareOutputStream(fileName);
+    public void startFile(String fileName, GlobalState state) {
+        prepareOutputStream(fileName, state);
 
         // Add prefix declarations
         prefix(WriterVocabulary.T_RDF_NS, WriterVocabulary.T_RDF_NS_URI);
@@ -33,12 +34,12 @@ public class TurtleWriter extends FlatWriter {
     }
 
     @Override
-    public void endFile() {
+    public void endFile(GlobalState state) {
         if (lastSubject != null) {
             endPredicateObjectList();
         }
 
-        super.endFile();
+        super.endFile(state);
     }
 
     protected void prefix(String prefix, String uri) {

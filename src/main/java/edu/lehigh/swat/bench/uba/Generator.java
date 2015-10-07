@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
 
 import java.io.*;
@@ -56,8 +57,7 @@ public class Generator {
      * @param compress
      *            Whether to compress output
      * @param consolidate
-     *            Whether to consolidate output for each university into a
-     *            single file
+     *            Whether and how to consolidate output
      * @param threads
      *            The number of threads to use for data generation
      * @param executionTimeout
@@ -69,8 +69,8 @@ public class Generator {
      *            Whether to enable quiet mode
      */
     public void start(int univNum, int startIndex, int seed, WriterType writerType, String ontology, String workDir,
-            boolean consolidate, boolean compress, int threads, long executionTimeout, TimeUnit executionTimeoutUnit,
-            boolean quiet) {
+            ConsolidationMode consolidate, boolean compress, int threads, long executionTimeout,
+            TimeUnit executionTimeoutUnit, boolean quiet) {
         File outputDir = workDir != null ? new File(workDir) : new File(".");
         outputDir = outputDir.getAbsoluteFile();
         if (!outputDir.exists() || !outputDir.isDirectory()) {
@@ -82,35 +82,40 @@ public class Generator {
         GlobalState state = new GlobalState(univNum, seed, startIndex, ontology, writerType, outputDir, consolidate,
                 compress, threads, executionTimeout, executionTimeoutUnit, quiet);
 
-        System.out.println("Started...");
-
-        // Submit a university generator for each university
-        List<UniversityState> states = new ArrayList<>();
-        for (int i = 0; i < state.getNumberUniversities(); i++) {
-            UniversityState univState = new UniversityState(state, i + state.getStartIndex());
-            UniversityGenerator univGen = new UniversityGenerator(univState);
-            state.getExecutor().submit(univGen);
-            states.add(univState);
-        }
         try {
-            state.getExecutor().shutdown();
-            if (!state.getExecutor().awaitTermination(state.getExecutionTimeout(), state.getExecutionTimeoutUnit())) {
-                // Force remaining threads to shut down
-                state.getExecutor().shutdownNow();
-                throw new RuntimeException("Timeout was exceeded");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException("A generator thread was interrupted", e);
-        }
+            System.out.println("Started...");
 
-        // Check everything completed
-        for (UniversityState univState : states) {
-            if (!univState.hasCompleted()) {
-                System.err.println("Not all university generators finished successfully, see log for details");
-                System.exit(3);
+            // Submit a university generator for each university
+            List<UniversityState> states = new ArrayList<>();
+            for (int i = 0; i < state.getNumberUniversities(); i++) {
+                UniversityState univState = new UniversityState(state, i + state.getStartIndex());
+                UniversityGenerator univGen = new UniversityGenerator(univState);
+                state.getExecutor().submit(univGen);
+                states.add(univState);
             }
-        }
+            try {
+                state.getExecutor().shutdown();
+                if (!state.getExecutor().awaitTermination(state.getExecutionTimeout(),
+                        state.getExecutionTimeoutUnit())) {
+                    // Force remaining threads to shut down
+                    state.getExecutor().shutdownNow();
+                    throw new RuntimeException("Timeout was exceeded");
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException("A generator thread was interrupted", e);
+            }
 
-        System.out.println("Completed!");
+            // Check everything completed
+            for (UniversityState univState : states) {
+                if (!univState.hasCompleted()) {
+                    throw new RuntimeException("Not all university generators finished successfully, see log for details");
+                }
+            }
+
+            System.out.println("Completed!");
+        } finally {
+            // Tell state to finish regardless of whether we encountered an error
+            state.finish();
+        }
     }
 }

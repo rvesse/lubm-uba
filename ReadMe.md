@@ -13,7 +13,7 @@ Data Generator for the LUBM Benchmark, this is the original code for the generat
         - Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
         - Added `--format <format>` option to control the output format, supports `OWL`, `DAML`, `NTRIPLES` and `TURTLE`
         - Added `--compress` option which compresses output files with GZip as they are generated
-        - Added `--consolidate` option which produces a single file per university rather than a file per university department, this avoids issues with excessive numbers of files being generated for larger numbers of universities
+        - Added `--consolidate <mode>` option which controls how many files are generates.  `None` generates 1 file per university department, `Partial` generates 1 file per university and `Full` generates a single file
         - Added `-t <threads>`/`--threads <threads>` option to allow parallel data generation for better performance
         - Added `--quiet` option to reduce logging verbosity
         - Added `--max-time <minutes>` option to specify the maximum amount of time to allow data generation to run for before forcibly aborting

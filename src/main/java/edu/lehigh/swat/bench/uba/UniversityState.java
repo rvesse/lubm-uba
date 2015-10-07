@@ -9,6 +9,7 @@ import edu.lehigh.swat.bench.uba.model.InstanceCount;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.model.PropertyCount;
 import edu.lehigh.swat.bench.uba.model.PublicationInfo;
+import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.DamlWriter;
 import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
 import edu.lehigh.swat.bench.uba.writers.OwlWriter;
@@ -62,7 +63,7 @@ public class UniversityState implements GeneratorCallbackTarget {
 
     private final Writer writer;
     private boolean completed = false;
-
+    
     public UniversityState(GlobalState state, int index) {
         this.state = state;
         this.index = index;
@@ -134,7 +135,7 @@ public class UniversityState implements GeneratorCallbackTarget {
         return writer;
     }
 
-    public String getDepartmentFilename(int deptIndex) {
+    public String getFilename(int deptIndex) {
         StringBuilder fileName = new StringBuilder();
 
         // Base in output directory
@@ -142,32 +143,21 @@ public class UniversityState implements GeneratorCallbackTarget {
         if (fileName.charAt(fileName.length() - 1) != File.separatorChar)
             fileName.append(File.separatorChar);
 
-        // University
-        fileName.append(getName(Ontology.CS_C_UNIV, this.index));
+        if (this.state.consolidationMode() != ConsolidationMode.Full) {
+            // University
+            fileName.append(getName(Ontology.CS_C_UNIV, this.index));
 
-        if (!this.state.consolidateFiles()) {
-            // Department Index
-            fileName.append(Generator.INDEX_DELIMITER);
-            fileName.append(deptIndex);
+            if (this.state.consolidationMode() == ConsolidationMode.None) {
+                // Department Index
+                fileName.append(Generator.INDEX_DELIMITER);
+                fileName.append(deptIndex);
+            }
+        } else {
+            fileName.append("Universities");
         }
 
         // Extension
-        switch (this.state.getWriterType()) {
-        case OWL:
-            fileName.append(".owl");
-            break;
-        case DAML:
-            fileName.append(".daml");
-            break;
-        case NTRIPLES:
-            fileName.append(".nt");
-            break;
-        case TURTLE:
-            fileName.append(".ttl");
-            break;
-        default:
-            throw new RuntimeException("Unknown writer type");
-        }
+        fileName.append(this.state.getFileExtension());
 
         // Compression?
         if (this.state.compressFiles()) {

@@ -127,18 +127,24 @@ do
   ST_BASE="${BASE}improved/single-threaded"
   createTempDir "${ST_BASE}"
   rm -f ${ST_BASE}/${FORMAT}/*${EXT}
-  ./generate.sh --univ ${NUM} --output ${ST_BASE}/${FORMAT} --onto "${ONTO_URL}" --format ${FORMAT} --timing
+  ./generate.sh --univ ${NUM} --output ${ST_BASE}/${FORMAT} --onto "${ONTO_URL}" --format ${FORMAT} --timing --quiet
 
   MT_BASE="${BASE}improved/multi-threaded"
   createTempDir "${MT_BASE}/${FORMAT}"
   rm -f ${MT_BASE}/${FORMAT}/*${EXT}
-  ./generate.sh --univ ${NUM} --output ${MT_BASE}/${FORMAT} --threads 8 --onto "${ONTO_URL}" --format ${FORMAT} --timing
+  ./generate.sh --univ ${NUM} --output ${MT_BASE}/${FORMAT} --threads 8 --onto "${ONTO_URL}" --format ${FORMAT} --timing --quiet
 
-  CON_BASE="${BASE}improved/consolidated"
-  createTempDir "${CON_BASE}/${FORMAT}"
-  rm -f ${CON_BASE}/${FORMAT}/*${EXT}
-  rm -f ${CON_BASE}/${FORMAT}/*_orig.nt
-  ./generate.sh --univ ${NUM} --output ${CON_BASE}/${FORMAT} --threads 8 --onto "${ONTO_URL}" --format ${FORMAT} --timing --consolidate
+  CON_SOME_BASE="${BASE}improved/consolidated/some"
+  createTempDir "${CON_SOME_BASE}/${FORMAT}"
+  rm -f ${CON_SOME_BASE}/${FORMAT}/*${EXT}
+  rm -f ${CON_SOME_BASE}/${FORMAT}/*_orig.nt
+  ./generate.sh --univ ${NUM} --output ${CON_SOME_BASE}/${FORMAT} --threads 8 --onto "${ONTO_URL}" --format ${FORMAT} --timing --quiet --consolidate Partial
+
+  CON_FULL_BASE="${BASE}improved/consolidated/full"
+  createTempDir "${CON_FULL_BASE}/${FORMAT}"
+  rm -f ${CON_FULL_BASE}/${FORMAT}/*${EXT}
+  rm -f ${CON_SOME_BASE}/${FORMAT}/*_orig.nt
+  ./generate.sh --univ ${NUM} --output ${CON_FULL_BASE}/${FORMAT} --threads 8 --onto "${ONTO_URL}" --format ${FORMAT} --timing --quiet --consolidate Full
 
   set +e
 
@@ -170,21 +176,33 @@ do
     fi
 
     OUT_NAME=${OUT_NAME%%_*}
-    if [ ! -e "${CON_BASE}/${FORMAT}/${OUT_NAME}${EXT}" ]; then
-      echo "Missing file ${CON_BASE}/${FORMAT}/${OUT_NAME}${EXT} from improved consolidated output"
+    if [ ! -e "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}${EXT}" ]; then
+      echo "Missing file ${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}${EXT} from improved consolidated output"
       exit 1
     fi
 
     # Prepare the concatenated output for testing
     set -e
-    CONSOLIDATED_FILE="${CON_BASE}/${FORMAT}/${OUT_NAME}_orig.nt"
+    CONSOLIDATED_FILE="${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt"
     if [ ! -e "${CONSOLIDATED_FILE}" ]; then
       riot --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/${OUT_NAME}* > "${CONSOLIDATED_FILE}"
       set +e
 
-      rdfdiff "${CON_BASE}/${FORMAT}/${OUT_NAME}_orig.nt" "${CON_BASE}/${FORMAT}/${OUT_NAME}${EXT}" N3 ${LANG} http://example.org/ http://example.org/
+      rdfdiff "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt" "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}${EXT}" N3 ${LANG} http://example.org/ http://example.org/
       if [ $? -ne 0 ]; then
-        echo "File ${OUT_NAME}${EXT} from improved consolidated output is different from non-consolidated outputs"
+        echo "File ${OUT_NAME}${EXT} from partially consolidated output is different from non-consolidated outputs"
+        exit 1
+      fi
+    fi
+    set -e
+    CONSOLIDATED_FILE="${CON_FULL_BASE}/${FORMAT}/Universities_orig.nt"
+    if [ ! -e "${CONSOLIDATED_FILE}" ]; then
+      riot --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/* > "${CONSOLIDATED_FILE}"
+      set +e
+
+      rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities${EXT}" N3 ${LANG} http://example.org/ http://example.org/
+      if [ $? -ne 0 ]; then
+        echo "Fully consolidated output is different from non-consolidated outputs"
         exit 1
       fi
     fi
