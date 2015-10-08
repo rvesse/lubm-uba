@@ -1,5 +1,6 @@
 package edu.lehigh.swat.bench.uba;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,6 +17,7 @@ import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
 import edu.lehigh.swat.bench.uba.writers.utils.BackgroundWriterService;
+import edu.lehigh.swat.bench.uba.writers.utils.BufferSizes;
 
 public class GlobalState {
 
@@ -76,7 +78,9 @@ public class GlobalState {
             try {
                 this.consolidatedOutput = new FileOutputStream(fileName.toString());
                 if (this.compress) {
-                    this.consolidatedOutput = new GZIPOutputStream(this.consolidatedOutput);
+                    this.consolidatedOutput = new GZIPOutputStream(this.consolidatedOutput, BufferSizes.GZIP_BUFFER_SIZE);
+                } else {
+                    this.consolidatedOutput = new BufferedOutputStream(this.consolidatedOutput, BufferSizes.OUTPUT_BUFFER_SIZE);
                 }
             } catch (IOException e) {
                 throw new RuntimeException(String.format("Failed to prepare consolidated output file %s", fileName), e);

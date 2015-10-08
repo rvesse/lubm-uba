@@ -52,22 +52,33 @@ public class BackgroundWriterService implements Runnable {
 
         // We'll use up to half the available heap
         // Our calculations our in KB so remember to convert appropriately
-        long approxSizePerEntry = getApproxSize(state);
+        long approxSizePerWrite = getApproxSize(state);
         long availableMemory = Runtime.getRuntime().maxMemory() / 2;
         availableMemory /= KB_PER_MB;
         LOGGER.info("Will use at most {}MB of heap memory for write buffers",
                 ((double) availableMemory / (double) KB_PER_MB));
 
-        // We'll round down so we have an equal number of slots per thread
-        // unless we're doing single threaded generation in which case we can
-        // still improve performance by maximising use of write buffers
-        // When we have multiple threads we'll be using fair scheduling so
-        // having a capacity be a multiple of the number of threads means each
-        // thread can have the same number of writes in the queue and no thread
-        // will be unduly blocked submitted to the writer service
-        int capacity = (int) (availableMemory / approxSizePerEntry);
+        // Calculate capacity by dividing the fraction of available memory by
+        // the approximate size per write
+        int capacity = (int) (availableMemory / approxSizePerWrite);
         if (capacity % state.getThreads() != 0 && state.getThreads() > 1) {
+            // We'll round down so we have an equal number of slots per thread
+            // unless we're doing single threaded generation in which case we
+            // can still improve performance by maximising use of write buffers
+
+            // When we have multiple threads we'll be using fair scheduling so
+            // having a capacity be a multiple of the number of threads means
+            // each thread can have the same number of writes in the queue and
+            // no thread will be unduly blocked submitted to the writer service
             capacity = capacity - (capacity % state.getThreads());
+        }
+        if (state.getThreads() > 1 && capacity > state.getThreads() * 16) {
+            // Cap the capacity at 16 times the number of threads
+            // When we calculate a high capacity it means we are using
+            // compression however since all the compression happens on this
+            // thread the writer thread is stuck doing masses of compression
+            // work at the end after all the generators have filled the queue
+            capacity = 16 * state.getThreads();
         }
         LOGGER.info("Background write buffer has total capacity of {}", capacity);
 
@@ -164,15 +175,13 @@ public class BackgroundWriterService implements Runnable {
                     // The number of writes we'll do will depend on how many
                     // writes are in the queue right now and will be capped at
                     // the number of threads in use
-                    // Of course once we're here we've already got at least one
-                    // write so may need to subtract one of the calculated
-                    // number of writes if the queue has more items that the
-                    // number of configured threads
+                    // UNLESS we've been told we're stopping at which point we
+                    // can exhaust the entire queue in one go
                     Queue<byte[]> writes = new LinkedList<>();
                     writes.add(next);
-                    int numWrites = Math.min(this.writeQueue.size(), this.state.getThreads());
-                    if (numWrites > this.state.getThreads())
-                        numWrites--;
+                    int numWrites = this.stop ? this.writeQueue.size()
+                            : Math.min(this.writeQueue.size(), this.state.getThreads() - 1);
+
                     while (numWrites > 0) {
                         // It it safe to use poll() here because we know that
                         // there must be at least numWrites writes in the queue

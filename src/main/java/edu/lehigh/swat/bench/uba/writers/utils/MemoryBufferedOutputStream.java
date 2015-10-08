@@ -17,7 +17,7 @@ public class MemoryBufferedOutputStream extends FilterOutputStream {
     private final GlobalState state;
 
     public MemoryBufferedOutputStream(GlobalState state) {
-        super(new ByteArrayOutputStream(16384));
+        super(new ByteArrayOutputStream(BufferSizes.MEMORY_BUFFER_SIZE));
         this.state = state;
     }
 
