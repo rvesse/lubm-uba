@@ -110,6 +110,10 @@ public class UniversityState implements GeneratorCallbackTarget {
 
     public void setComplete() {
         this.completed = true;
+
+        // Throw away our reference to writer because it could be holding
+        // various buffers which if we no longer need and as such should be GC'd
+        this.writer = null;
     }
 
     public void setError(Throwable e) {

@@ -35,12 +35,8 @@ public class BackgroundWriterService implements Runnable {
     //@formatter:off
     private static final long APPROX_SIZE_OWL = 12 * KB_PER_MB,
                               APPROX_SIZE_DAML = APPROX_SIZE_OWL,
-                              APPROX_SIZE_NTRIPLES = 24 * KB_PER_MB,
-                              APPROX_SIZE_TURTLE = 8 * KB_PER_MB,
-                              APPROX_SIZE_OWL_COMPRESSED = 350,
-                              APPROX_SIZE_DAML_COMPRESSED = APPROX_SIZE_OWL_COMPRESSED,
-                              APPROX_SIZE_NTRIPLES_COMPRESSED = 750,
-                              APPROX_SIZE_TURTLE_COMPRESSED = 350;
+                              APPROX_SIZE_NTRIPLES = 30 * KB_PER_MB,
+                              APPROX_SIZE_TURTLE = 8 * KB_PER_MB;
     //@formatter:on
 
     private boolean stop, terminate;
@@ -69,16 +65,18 @@ public class BackgroundWriterService implements Runnable {
             // When we have multiple threads we'll be using fair scheduling so
             // having a capacity be a multiple of the number of threads means
             // each thread can have the same number of writes in the queue and
-            // no thread will be unduly blocked submitted to the writer service
+            // no thread will be unduly blocked submitting to the writer service
             capacity = capacity - (capacity % state.getThreads());
         }
-        if (state.getThreads() > 1 && capacity > state.getThreads() * 16) {
-            // Cap the capacity at 16 times the number of threads
-            // When we calculate a high capacity it means we are using
-            // compression however since all the compression happens on this
+        if (state.getThreads() > 1 && capacity > state.getThreads() * 8) {
+            // Cap the capacity at 8 times the number of threads
+            // When we calculate a high capacity it means we have a large heap
+            // however since all the compression happens on this
             // thread the writer thread is stuck doing masses of compression
-            // work at the end after all the generators have filled the queue
-            capacity = 16 * state.getThreads();
+            // work at the end after all the generators have filled the queue so
+            // letting the generators fill the write queue massively is a bad
+            // idea
+            capacity = 8 * state.getThreads();
         }
         LOGGER.info("Background write buffer has total capacity of {}", capacity);
 
@@ -86,28 +84,15 @@ public class BackgroundWriterService implements Runnable {
     }
 
     private static long getApproxSize(GlobalState state) {
-        if (state.compressFiles()) {
-            switch (state.getWriterType()) {
-            case OWL:
-                return APPROX_SIZE_OWL_COMPRESSED;
-            case DAML:
-                return APPROX_SIZE_DAML_COMPRESSED;
-            case NTRIPLES:
-                return APPROX_SIZE_NTRIPLES_COMPRESSED;
-            case TURTLE:
-                return APPROX_SIZE_TURTLE_COMPRESSED;
-            }
-        } else {
-            switch (state.getWriterType()) {
-            case OWL:
-                return APPROX_SIZE_OWL;
-            case DAML:
-                return APPROX_SIZE_DAML;
-            case NTRIPLES:
-                return APPROX_SIZE_NTRIPLES;
-            case TURTLE:
-                return APPROX_SIZE_TURTLE;
-            }
+        switch (state.getWriterType()) {
+        case OWL:
+            return APPROX_SIZE_OWL;
+        case DAML:
+            return APPROX_SIZE_DAML;
+        case NTRIPLES:
+            return APPROX_SIZE_NTRIPLES;
+        case TURTLE:
+            return APPROX_SIZE_TURTLE;
         }
         throw new IllegalArgumentException(String.format("Unknown Writer Type %s", state.getWriterType()));
     }
@@ -240,7 +225,7 @@ public class BackgroundWriterService implements Runnable {
                 }
             }
         } finally {
-            
+
             // If we're terminating due to an error and the write queue is full
             // we could have other threads blocked waiting to put stuff into the
             // queue

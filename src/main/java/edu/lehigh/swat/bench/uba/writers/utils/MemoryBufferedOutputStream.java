@@ -27,5 +27,6 @@ public class MemoryBufferedOutputStream extends FilterOutputStream {
 
         // Submit the write to the background writer service
         this.state.getBackgroundWriterService().submit(((ByteArrayOutputStream) this.out).toByteArray());
+        this.out = null;
     }
 }
