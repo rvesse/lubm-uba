@@ -147,9 +147,9 @@ public class BackgroundWriterService implements Runnable {
         if (this.stop)
             throw new IllegalStateException("Cannot submit a write after the service has been told to stop");
 
-        // Ignore write submission if asked to terminate
+        // Illegal to submit writes during termination
         if (this.terminate)
-            return;
+            throw new IllegalStateException("Cannot submit a write after the service has been terminated/died");
 
         // Submit write which may block
         try {
@@ -240,6 +240,15 @@ public class BackgroundWriterService implements Runnable {
                 }
             }
         } finally {
+            
+            // If we're terminating due to an error and the write queue is full
+            // we could have other threads blocked waiting to put stuff into the
+            // queue
+            // Emptying the queue will unblock them since their puts can now
+            // proceed and further submitted writes will be discarded anyway
+            this.terminate = true;
+            this.writeQueue.clear();
+
             // Ensure we close the output stream when we terminate
             try {
                 LOGGER.debug("Closing consolidated output file");
