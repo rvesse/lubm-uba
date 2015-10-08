@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Locate ourselves, will fail on BSD/OS X because they don't have readlink -f
+# Locate our directory
 case "${OSTYPE}" in
   bsd*|darwin*)
     # BSD/OS X doesn't support readlink -f
-    SCRIPT=$0
+    SCRIPT_DIR=$(dirname $0)
     while [ -L "${SCRIPT}" ];
     do
       SCRIPT=$(readlink "${SCRIPT}")
@@ -12,10 +12,9 @@ case "${OSTYPE}" in
     ;;
   *)
     # Can use readlink -f on standard Linux
-    SCRIPT=$(readlink -f $0)
+    SCRIPT_DIR=$(readlink -f $(dirname $0))
     ;;
 esac
-SCRIPT_DIR=$(dirname "${SCRIPT}")
 
 # Check for the script
 if [ ! -e "${SCRIPT_DIR}/target/lubm-uba.jar" ]; then
@@ -24,4 +23,4 @@ if [ ! -e "${SCRIPT_DIR}/target/lubm-uba.jar" ]; then
 fi
 
 # Exec the Java class
-exec java ${JAVA_OPTS} -jar target/lubm-uba.jar $*
+exec java ${JAVA_OPTS} -jar "${SCRIPT_DIR}/target/lubm-uba.jar" $*

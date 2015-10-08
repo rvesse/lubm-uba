@@ -173,19 +173,31 @@ public class BackgroundWriterService implements Runnable {
                     // We'll try and do multiple writes in one go wherever
                     // possible
                     // The number of writes we'll do will depend on how many
-                    // writes are in the queue right now and will be capped at
-                    // the number of threads in use
-                    // UNLESS we've been told we're stopping at which point we
-                    // can exhaust the entire queue in one go
+                    // writes are in the queue right now and will be
+                    // capped at the number of threads in use
+                    // UNLESS we're going to stop
                     Queue<byte[]> writes = new LinkedList<>();
                     writes.add(next);
                     int numWrites = this.stop ? this.writeQueue.size()
                             : Math.min(this.writeQueue.size(), this.state.getThreads() - 1);
 
+                    // TODO - While this might be a nice idea it risks blowing
+                    // up memory because we then double the amount of memory we
+                    // could be using if we were to drain the full queue at the
+                    // same time as allowing the generator threads to fill it
+                    // back up again
+
+                    // // In the case where the write queue is full drain the
+                    // // entire queue
+                    // if (!this.stop && this.writeQueue.remainingCapacity() ==
+                    // 0) {
+                    // numWrites = this.writeQueue.size();
+                    // }
+
                     while (numWrites > 0) {
                         // It it safe to use poll() here because we know that
                         // there must be at least numWrites writes in the queue
-                        // so no need to worry about writes
+                        // so no need to worry about poll() returning null
                         writes.add(this.writeQueue.poll());
                         numWrites--;
                     }
