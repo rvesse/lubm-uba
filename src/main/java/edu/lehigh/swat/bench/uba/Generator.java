@@ -20,6 +20,7 @@
 package edu.lehigh.swat.bench.uba;
 
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -83,6 +84,7 @@ public class Generator {
                 compress, threads, executionTimeout, executionTimeoutUnit, quiet);
 
         try {
+            state.start();
             System.out.println("Started...");
 
             // Submit a university generator for each university
@@ -98,24 +100,42 @@ public class Generator {
                 if (!state.getExecutor().awaitTermination(state.getExecutionTimeout(),
                         state.getExecutionTimeoutUnit())) {
                     // Force remaining threads to shut down
+                    if (state.getBackgroundWriterService() != null)
+                        state.getBackgroundWriterService().terminate();
                     state.getExecutor().shutdownNow();
                     throw new RuntimeException("Timeout was exceeded");
                 }
             } catch (InterruptedException e) {
+                if (state.getBackgroundWriterService() != null)
+                    state.getBackgroundWriterService().terminate();
                 throw new RuntimeException("A generator thread was interrupted", e);
             }
 
             // Check everything completed
             for (UniversityState univState : states) {
                 if (!univState.hasCompleted()) {
-                    throw new RuntimeException("Not all university generators finished successfully, see log for details");
+                    if (state.getBackgroundWriterService() != null)
+                        state.getBackgroundWriterService().terminate();
+                    throw new RuntimeException(
+                            "Not all university generators finished successfully, see log for details");
                 }
             }
+            
+            // Tell background writer service we're done (if in use)
+            if (state.getBackgroundWriterService() != null)
+                state.getBackgroundWriterService().stop();
 
             System.out.println("Completed!");
         } finally {
-            // Tell state to finish regardless of whether we encountered an error
-            state.finish();
+            // Tell state to finish regardless of whether we encountered an
+            // error
+            try {
+                state.finish();
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Interruped while waiting for generation to finish", e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException("Background writer service failed", e);
+            }
         }
     }
 }

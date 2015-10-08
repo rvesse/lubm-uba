@@ -10,4 +10,5 @@ dependency-reduced-pom.xml
 # Generator Artifacts
 log.txt
 University*.*
+Universities.*
 *.log

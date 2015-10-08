@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
@@ -13,6 +15,7 @@ import java.util.zip.GZIPOutputStream;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
+import edu.lehigh.swat.bench.uba.writers.utils.BackgroundWriterService;
 
 public class GlobalState {
 
@@ -36,10 +39,15 @@ public class GlobalState {
     private final ConsolidationMode consolidate;
     private OutputStream consolidatedOutput;
 
+    private final int threads;
     private final ExecutorService executorService;
     private final long executionTimeout;
     private final TimeUnit executionTimeoutUnit;
-
+    
+    private BackgroundWriterService writerService;
+    private ExecutorService writerExecutorService;
+    private Future<?> writerFuture;
+    
     public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir,
             ConsolidationMode consolidate, boolean compress, int threads, long executionTimeout,
             TimeUnit executionTimeoutUnit, boolean quiet) {
@@ -88,7 +96,9 @@ public class GlobalState {
 
         if (threads <= 1) {
             this.executorService = Executors.newSingleThreadExecutor();
+            this.threads = 1;
         } else {
+            this.threads = threads;
             this.executorService = Executors.newFixedThreadPool(threads);
         }
     }
@@ -127,6 +137,10 @@ public class GlobalState {
 
     public boolean isQuietMode() {
         return this.quiet;
+    }
+    
+    public int getThreads() {
+        return this.threads;
     }
 
     public ExecutorService getExecutor() {
@@ -181,19 +195,24 @@ public class GlobalState {
     public OutputStream getConsolidatedOutput() {
         return this.consolidatedOutput;
     }
-
-    public void finish() {
+    
+    public BackgroundWriterService getBackgroundWriterService() {
+        return this.writerService;
+    }
+    
+    public void start() {
         if (this.consolidationMode() == ConsolidationMode.Full) {
-            try {
-                synchronized (this.consolidatedOutput) {
-                    this.consolidatedOutput.flush();
-                    this.consolidatedOutput.close();
-                }
-                
-                System.out.println(String.format("Universities%s%s generated", getFileExtension(), this.compress ? ".gz" : ""));
-            } catch (IOException e) {
-                throw new RuntimeException("Error finishing consolidated output file", e);
-            }
+            // Set up background writer service appropriately
+            this.writerExecutorService = Executors.newSingleThreadExecutor();
+            this.writerService = new BackgroundWriterService(this);
+            this.writerFuture = this.writerExecutorService.submit(this.writerService);
+        }
+    }
+
+    public void finish() throws InterruptedException, ExecutionException {
+        if (this.consolidationMode() == ConsolidationMode.Full) {
+            this.writerService.stop();
+            this.writerFuture.get();
         }
     }
 }

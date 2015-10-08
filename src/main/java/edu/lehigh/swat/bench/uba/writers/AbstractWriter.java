@@ -8,6 +8,7 @@ import java.util.zip.GZIPOutputStream;
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.GlobalState;
+import edu.lehigh.swat.bench.uba.writers.utils.MemoryBufferedOutputStream;
 
 public class AbstractWriter {
 
