@@ -33,7 +33,7 @@ public class AbstractWriter {
      * @param state
      *            State
      */
-    protected void prepareOutputStream(String fileName, GlobalState state) {
+    protected final void prepareOutputStream(String fileName, GlobalState state) {
         if (state.consolidationMode() != ConsolidationMode.Full) {
             try {
                 // Prepare the output stream
@@ -55,8 +55,13 @@ public class AbstractWriter {
     /**
      * Cleans up the output stream
      */
-    protected void cleanupOutputStream() {
+    protected final void cleanupOutputStream() {
         if (out.checkError()) {
+            // Make sure to null out the output stream when we're done because
+            // the nature of how we do multi-threading means we have lots of
+            // references to our writers each of which may be holding a
+            // reference to a buffer
+            out = null;
             throw new RuntimeException("Error writing file");
         }
 
@@ -64,6 +69,11 @@ public class AbstractWriter {
         out.close();
 
         if (out.checkError()) {
+            // Make sure to null out the output stream when we're done because
+            // the nature of how we do multi-threading means we have lots of
+            // references to our writers each of which may be holding a
+            // reference to a buffer
+            out = null;
             throw new RuntimeException("Error writing file");
         }
     }

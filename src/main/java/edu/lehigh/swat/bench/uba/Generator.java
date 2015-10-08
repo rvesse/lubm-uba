@@ -112,12 +112,12 @@ public class Generator {
             }
 
             // Check everything completed
+            if (!state.shouldContinue()) {
+                notAllGeneratorsFinished(state);
+            }
             for (UniversityState univState : states) {
                 if (!univState.hasCompleted()) {
-                    if (state.getBackgroundWriterService() != null)
-                        state.getBackgroundWriterService().terminate();
-                    throw new RuntimeException(
-                            "Not all university generators finished successfully, see log for details");
+                    notAllGeneratorsFinished(state);
                 }
             }
             
@@ -137,5 +137,12 @@ public class Generator {
                 throw new RuntimeException("Background writer service failed", e);
             }
         }
+    }
+
+    protected void notAllGeneratorsFinished(GlobalState state) {
+        if (state.getBackgroundWriterService() != null)
+            state.getBackgroundWriterService().terminate();
+        throw new RuntimeException(
+                "Not all university generators finished successfully, see log for details");
     }
 }

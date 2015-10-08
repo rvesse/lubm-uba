@@ -25,10 +25,16 @@ class UniversityGenerator implements Runnable {
     }
 
     public void run() {
+        if (!this.univState.getGlobalState().shouldContinue()) {
+            LOGGER.error("Some data generators have failed, skipping further data generation (University {})", this.univState.getUniversityIndex());
+            return;
+        }
+        
         try {
             _generateUniv(this.univState);
             this.univState.setComplete();
         } catch (Throwable e) {
+            this.univState.setError(e);
             LOGGER.error("Error in generating University {} - {}", this.univState.getUniversityIndex(), e);
             StringWriter strWriter = new StringWriter();
             PrintWriter writer = new PrintWriter(strWriter);

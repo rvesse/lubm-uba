@@ -61,9 +61,10 @@ public class UniversityState implements GeneratorCallbackTarget {
      */
     private int chair;
 
-    private final Writer writer;
+    private Writer writer;
     private boolean completed = false;
-    
+    private Throwable error = null;
+
     public UniversityState(GlobalState state, int index) {
         this.state = state;
         this.index = index;
@@ -109,6 +110,24 @@ public class UniversityState implements GeneratorCallbackTarget {
 
     public void setComplete() {
         this.completed = true;
+    }
+
+    public void setError(Throwable e) {
+        this.error = e;
+        this.state.incrementErrorCount();
+
+        // Throw away our reference to writer because it could be holding
+        // various buffers which if we've failed we no longer need and as such
+        // should be GC'd
+        this.writer = null;
+    }
+
+    public boolean hasError() {
+        return this.error != null;
+    }
+
+    public Throwable getError() {
+        return this.error;
     }
 
     public GlobalState getGlobalState() {

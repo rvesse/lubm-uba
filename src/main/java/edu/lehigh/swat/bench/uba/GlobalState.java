@@ -45,6 +45,7 @@ public class GlobalState {
     private final ExecutorService executorService;
     private final long executionTimeout;
     private final TimeUnit executionTimeoutUnit;
+    private final AtomicLong errorCount = new AtomicLong(0);
     
     private BackgroundWriterService writerService;
     private ExecutorService writerExecutorService;
@@ -173,6 +174,14 @@ public class GlobalState {
 
     public long getTotalProperties(int propType) {
         return this.totalPropertiesGenerated[propType].get();
+    }
+    
+    public void incrementErrorCount() {
+        this.errorCount.incrementAndGet();
+    }
+    
+    public boolean shouldContinue() {
+        return this.errorCount.get() == 0;
     }
 
     /**
