@@ -48,7 +48,7 @@ Using consolidation will reduce the number of files generated though total IO wi
 
 #### Compression
 
-The `--compress` option trades processing power for substantially reduced IO. The reduced IO which is invaluable at larger scales, for example with 8000 universities and `--consolidate Full` the compressed N-Triples output file is 2.5GB while the uncompressed output is 85GB.
+The `--compress` option trades processing power for substantially reduced IO. The reduced IO is invaluable at larger scales, for example with 8000 universities and `--consolidate Full` the compressed N-Triples output file is 2.5 GB while the uncompressed output is 85 GB.
 
 Using it with `--consolidate Full` may reduce overall performance because all the compression happens on a single thread whereas with other consolidation modes compression is spread across all threads.
 
@@ -77,7 +77,7 @@ HDD | Yes               | 525s           | 730 MB
 
 For generating data like so:
 
-    > ./generate.sh --quiet --timing -u 1000 --format NTRIPLES  --consolidate Full --threads 8
+    > ./generate.sh --quiet --timing -u 1000 --format NTRIPLES  --consolidate Partial --threads 8
 
 Produces the follow performance numbers (on a quad core system with 4GB JVM Heap):
 
