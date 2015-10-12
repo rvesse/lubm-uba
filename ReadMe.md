@@ -40,7 +40,7 @@ There are a number of parameters that can be used to tune the performance of the
 
 #### Multi-threading
 
-We strongly suggest using `--threads` to set the number of threads, typically you should set this to twice the number of processor cores (assuming an Hyper-threading enabled).  Using this option will give you substantially better performance than not using it.
+We strongly suggest using `--threads` to set the number of threads, typically you should set this to twice the number of processor cores (assuming hyper-threading enabled).  Using this option will give you substantially better performance than not using it.
 
 #### Consolidation
 
