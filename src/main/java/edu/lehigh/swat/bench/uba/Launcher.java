@@ -62,7 +62,7 @@ public class Launcher {
             "--ontology" }, title = "OntologyUrl", description = "URL for the benchmark ontology used as the base URL in the generated data (default "
                     + DEFAULT_ONTOLOGY_URL + ")")
     @NotBlank
-    private String ontology = "http://swat.cse.lehigh.edu/onto/univ-bench.owl";
+    private String ontology = DEFAULT_ONTOLOGY_URL;
 
     @Option(name = { "-o",
             "--output" }, title = "OutputDirectory", description = "Sets the output directory to which generated files are written (defaults to working directory)")
