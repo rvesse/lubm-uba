@@ -25,20 +25,6 @@ import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 public class BackgroundWriterService implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BackgroundWriterService.class);
-
-    private static final long KB_PER_MB = 1024;
-    /**
-     * The approximate sizes of each universities output data in the different
-     * formats both compressed and uncompressed. We'll use these to help
-     * estimate how large to make the capacity of our blocking queue.
-     */
-    //@formatter:off
-    private static final long APPROX_SIZE_OWL = 12 * KB_PER_MB,
-                              APPROX_SIZE_DAML = APPROX_SIZE_OWL,
-                              APPROX_SIZE_NTRIPLES = 30 * KB_PER_MB,
-                              APPROX_SIZE_TURTLE = 8 * KB_PER_MB;
-    //@formatter:on
-
     private boolean stop, terminate;
     private final ArrayBlockingQueue<byte[]> writeQueue;
     private final GlobalState state;
@@ -46,55 +32,15 @@ public class BackgroundWriterService implements Runnable {
     public BackgroundWriterService(GlobalState state) {
         this.state = state;
 
-        // We'll use up to half the available heap
-        // Our calculations our in KB so remember to convert appropriately
-        long approxSizePerWrite = getApproxSize(state);
-        long availableMemory = Runtime.getRuntime().maxMemory() / 2;
-        availableMemory /= KB_PER_MB;
-        LOGGER.info("Will use at most {}MB of heap memory for write buffers",
-                ((double) availableMemory / (double) KB_PER_MB));
-
-        // Calculate capacity by dividing the fraction of available memory by
-        // the approximate size per write
-        int capacity = (int) (availableMemory / approxSizePerWrite);
-        if (capacity % state.getThreads() != 0 && state.getThreads() > 1) {
-            // We'll round down so we have an equal number of slots per thread
-            // unless we're doing single threaded generation in which case we
-            // can still improve performance by maximising use of write buffers
-
-            // When we have multiple threads we'll be using fair scheduling so
-            // having a capacity be a multiple of the number of threads means
-            // each thread can have the same number of writes in the queue and
-            // no thread will be unduly blocked submitting to the writer service
-            capacity = capacity - (capacity % state.getThreads());
-        }
-        if (state.getThreads() > 1 && capacity > state.getThreads() * 8) {
-            // Cap the capacity at 8 times the number of threads
-            // When we calculate a high capacity it means we have a large heap
-            // however since all the compression happens on this
-            // thread the writer thread is stuck doing masses of compression
-            // work at the end after all the generators have filled the queue so
-            // letting the generators fill the write queue massively is a bad
-            // idea
-            capacity = 8 * state.getThreads();
-        }
-        LOGGER.info("Background write buffer has total capacity of {}", capacity);
-
-        this.writeQueue = new ArrayBlockingQueue<>(capacity, true);
-    }
-
-    private static long getApproxSize(GlobalState state) {
-        switch (state.getWriterType()) {
-        case OWL:
-            return APPROX_SIZE_OWL;
-        case DAML:
-            return APPROX_SIZE_DAML;
-        case NTRIPLES:
-            return APPROX_SIZE_NTRIPLES;
-        case TURTLE:
-            return APPROX_SIZE_TURTLE;
-        }
-        throw new IllegalArgumentException(String.format("Unknown Writer Type %s", state.getWriterType()));
+        // Set write queue to have capacity of number of threads so each thread
+        // can have at most one write waiting and at most one write prepared to
+        // add to the queue
+        // Previous versions tried to intelligently calculate the write queue
+        // size based on the amount of available heap memory but that proved
+        // very fragile at scale so it is safer to use a low write queue
+        // capacity
+        LOGGER.info("Background write buffer has total capacity of {}", state.getThreads());
+        this.writeQueue = new ArrayBlockingQueue<>(state.getThreads(), true);
     }
 
     /**
