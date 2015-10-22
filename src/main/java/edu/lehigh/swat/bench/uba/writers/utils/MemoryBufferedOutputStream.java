@@ -3,6 +3,8 @@ package edu.lehigh.swat.bench.uba.writers.utils;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+
 import edu.lehigh.swat.bench.uba.GlobalState;
 
 /**
@@ -26,7 +28,9 @@ public class MemoryBufferedOutputStream extends FilterOutputStream {
         super.close();
 
         // Submit the write to the background writer service
-        this.state.getBackgroundWriterService().submit(((ByteArrayOutputStream) this.out).toByteArray());
+        OutputStream output = this.state.getWriterPool().getOutputStream();
+        output.write(((ByteArrayOutputStream) this.out).toByteArray());
+        output.flush();
         this.out = null;
     }
 }

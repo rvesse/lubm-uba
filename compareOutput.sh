@@ -63,6 +63,7 @@ ONTO_URL="http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl"
 
 set -e
 
+# Use the original code to generate data
 git checkout master
 mvn clean package
 
@@ -73,10 +74,9 @@ createTempDir "${ORIG_BASE}"
 rm -f ${ORIG_BASE}*.owl
 ./generate.sh -onto "${ONTO_URL}" -univ ${NUM} -out "${ORIG_BASE}"
 
-function useImproved() {
-  git checkout improved
-  mvn clean package
-}
+# Switch to the improved code for the rest of the testing
+git checkout improved
+mvn clean package
 
 function ext() {
   case $1 in
@@ -122,7 +122,6 @@ do
   LANG=$(lang "${FORMAT}")
 
   set -e
-  useImproved
 
   ST_BASE="${BASE}improved/single-threaded"
   createTempDir "${ST_BASE}"
@@ -172,6 +171,7 @@ do
     rdfdiff /tmp/lubm/orig/${NAME} ${MT_BASE}/${FORMAT}/${OUT_NAME}${EXT} RDF/XML ${LANG} http://example.org/ http://example.org/
     if [ $? -ne 0 ]; then
       echo "File ${OUT_NAME}${EXT} from improved multi-threaded output is different from ${FILE}"
+      echo rdfdiff /tmp/lubm/orig/${NAME} ${MT_BASE}/${FORMAT}/${OUT_NAME}${EXT} RDF/XML ${LANG} http://example.org/ http://example.org/
       exit 1
     fi
 
@@ -191,6 +191,7 @@ do
       rdfdiff "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt" "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}${EXT}" N3 ${LANG} http://example.org/ http://example.org/
       if [ $? -ne 0 ]; then
         echo "File ${OUT_NAME}${EXT} from partially consolidated output is different from non-consolidated outputs"
+        echo rdfdiff "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt" "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}${EXT}" N3 ${LANG} http://example.org/ http://example.org/
         exit 1
       fi
     fi
@@ -198,11 +199,13 @@ do
     CONSOLIDATED_FILE="${CON_FULL_BASE}/${FORMAT}/Universities_orig.nt"
     if [ ! -e "${CONSOLIDATED_FILE}" ]; then
       riot --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/* > "${CONSOLIDATED_FILE}"
+      riot --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > "${CON_FULL_BASE}/${FORMAT}/Universities${EXT}"
       set +e
 
       rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities${EXT}" N3 ${LANG} http://example.org/ http://example.org/
       if [ $? -ne 0 ]; then
         echo "Fully consolidated output is different from non-consolidated outputs"
+        echo rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities${EXT}" N3 ${LANG} http://example.org/ http://example.org/
         exit 1
       fi
     fi

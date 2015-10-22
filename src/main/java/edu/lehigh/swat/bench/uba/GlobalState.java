@@ -5,10 +5,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.zip.GZIPOutputStream;
@@ -16,8 +14,8 @@ import java.util.zip.GZIPOutputStream;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
-import edu.lehigh.swat.bench.uba.writers.utils.BackgroundWriterService;
 import edu.lehigh.swat.bench.uba.writers.utils.BufferSizes;
+import edu.lehigh.swat.bench.uba.writers.utils.WriterPool;
 
 public class GlobalState {
 
@@ -47,10 +45,8 @@ public class GlobalState {
     private final TimeUnit executionTimeoutUnit;
     private final AtomicLong errorCount = new AtomicLong(0);
     
-    private BackgroundWriterService writerService;
-    private ExecutorService writerExecutorService;
-    private Future<?> writerFuture;
-    
+    private final WriterPool writerPool;
+        
     public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir,
             ConsolidationMode consolidate, boolean compress, int threads, long executionTimeout,
             TimeUnit executionTimeoutUnit, boolean quiet) {
@@ -105,6 +101,13 @@ public class GlobalState {
         } else {
             this.threads = threads;
             this.executorService = Executors.newFixedThreadPool(threads);
+        }
+        
+        if (this.consolidationMode() == ConsolidationMode.Full) {
+            // Set up background writer service appropriately
+            this.writerPool = new WriterPool(this);
+        } else {
+            this.writerPool = null;
         }
     }
 
@@ -205,27 +208,18 @@ public class GlobalState {
         }
     }
     
-    public OutputStream getConsolidatedOutput() {
-        return this.consolidatedOutput;
-    }
-    
-    public BackgroundWriterService getBackgroundWriterService() {
-        return this.writerService;
+    public WriterPool getWriterPool() {
+        return this.writerPool;
     }
     
     public void start() {
-        if (this.consolidationMode() == ConsolidationMode.Full) {
-            // Set up background writer service appropriately
-            this.writerExecutorService = Executors.newSingleThreadExecutor();
-            this.writerService = new BackgroundWriterService(this);
-            this.writerFuture = this.writerExecutorService.submit(this.writerService);
-        }
+        // No start actions currently
     }
 
-    public void finish() throws InterruptedException, ExecutionException {
+    public void finish() {
         if (this.consolidationMode() == ConsolidationMode.Full) {
-            this.writerService.stop();
-            this.writerFuture.get();
+            // Close the writer pool
+            this.writerPool.close();
         }
     }
 }

@@ -20,7 +20,6 @@
 package edu.lehigh.swat.bench.uba;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -100,14 +99,10 @@ public class Generator {
                 if (!state.getExecutor().awaitTermination(state.getExecutionTimeout(),
                         state.getExecutionTimeoutUnit())) {
                     // Force remaining threads to shut down
-                    if (state.getBackgroundWriterService() != null)
-                        state.getBackgroundWriterService().terminate();
                     state.getExecutor().shutdownNow();
                     throw new RuntimeException("Timeout was exceeded");
                 }
             } catch (InterruptedException e) {
-                if (state.getBackgroundWriterService() != null)
-                    state.getBackgroundWriterService().terminate();
                 throw new RuntimeException("A generator thread was interrupted", e);
             }
 
@@ -120,29 +115,21 @@ public class Generator {
                     notAllGeneratorsFinished(state);
                 }
             }
-            
-            // Tell background writer service we're done (if in use)
-            if (state.getBackgroundWriterService() != null)
-                state.getBackgroundWriterService().stop();
+
+            // Tell state we're finished
+            state.finish();
 
             System.out.println("Completed!");
         } finally {
             // Tell state to finish regardless of whether we encountered an
             // error
-            try {
-                state.finish();
-            } catch (InterruptedException e) {
-                throw new RuntimeException("Interruped while waiting for generation to finish", e);
-            } catch (ExecutionException e) {
-                throw new RuntimeException("Background writer service failed", e);
-            }
+            // If we completed successfully then this will already have been
+            // called and calling it again is a no-op
+            state.finish();
         }
     }
 
-    protected void notAllGeneratorsFinished(GlobalState state) {
-        if (state.getBackgroundWriterService() != null)
-            state.getBackgroundWriterService().terminate();
-        throw new RuntimeException(
-                "Not all university generators finished successfully, see log for details");
+    private void notAllGeneratorsFinished(GlobalState state) {
+        throw new RuntimeException("Not all university generators finished successfully, see log for details");
     }
 }
