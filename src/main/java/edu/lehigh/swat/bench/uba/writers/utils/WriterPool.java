@@ -35,6 +35,7 @@ public class WriterPool {
     private final List<OutputStream> writers = new ArrayList<>();
     private final List<String> filenames = new ArrayList<>();
     private final ThreadLocal<OutputStream> threadWriters = new ThreadLocal<>();
+    private final ThreadLocal<Integer> threadIds = new ThreadLocal<>();
     private boolean closed = false;
 
     /**
@@ -84,9 +85,29 @@ public class WriterPool {
             synchronized (this.writers) {
                 this.writers.add(output);
                 this.filenames.add(filename.toString());
+                this.threadIds.set(id);
             }
         }
         return output;
+    }
+
+    /**
+     * Gets the ID of the writer for this thread
+     * 
+     * @return Writer ID
+     */
+    public int getWriterId() {
+        Integer i = this.threadIds.get();
+        if (i == null) {
+            // Get the writer for this thread to cause the ID to be allocated
+            try {
+                getOutputStream();
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to allocate a writer ID for this thread");
+            }
+        }
+        i = this.threadIds.get();
+        return i;
     }
 
     /**

@@ -11,4 +11,5 @@ dependency-reduced-pom.xml
 log.txt
 University*.*
 Universities.*
+Universities-*
 *.log

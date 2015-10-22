@@ -176,7 +176,8 @@ public class UniversityState implements GeneratorCallbackTarget {
                 fileName.append(deptIndex);
             }
         } else {
-            fileName.append("Universities");
+            fileName.append("Universities-");
+            fileName.append(Integer.toString(this.state.getWriterPool().getWriterId()));
         }
 
         // Extension

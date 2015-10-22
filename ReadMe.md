@@ -44,19 +44,17 @@ We strongly suggest using `--threads` to set the number of threads, typically yo
 
 #### Consolidation
 
-Using consolidation will reduce the number of files generated though total IO will be roughly the same. With `--consolidate Partial` you get a file per university (which can still be a lot of files at scale) while `--consolidate Full` will produce only a single file **but** will take longer because the IO to the single file can't be done in parallel.
+Using consolidation will reduce the number of files generated though total IO will be roughly the same. With `--consolidate Partial` you get a file per university (which can still be a lot of files at scale) while `--consolidate Full` will produce a single file per-thread which provides the least number of files while still giving good parallel throughput.
 
 #### Compression
 
 The `--compress` option trades processing power for substantially reduced IO. The reduced IO is invaluable at larger scales, for example with 8000 universities and `--consolidate Full` the compressed N-Triples output file is 2.5 GB while the uncompressed output is 85 GB.
 
-Using it with `--consolidate Full` may reduce overall performance because all the compression happens on a single thread whereas with other consolidation modes compression is spread across all threads.
-
 #### Output Format
 
 The value given for `--format` controls the output data format and can have an effect on the amount of IO done and the performance.
 
-`TURTLE` is the most compact format but is most expensive to produce because the reduction to prefixed name form takes time.  `NTRIPLES` and `OWL` are typically the fastest formats to produce.
+`TURTLE` is the most compact format but is most expensive to produce because the reduction to prefixed name form takes extra time.  `NTRIPLES` and `OWL` are typically the fastest formats to produce.
 
 #### Combining Compression and Consolidation
 
@@ -70,7 +68,7 @@ Produces the follow performance numbers (on a quad core system with 4GB JVM Heap
 
 Disk | `--compress` | Time           | File Size (Approx.)
 ------ | ----------------- | --------------- | -----------
-SSD | No                 | 175s          | 24 GB
+SSD | No                 | 171s          | 24 GB
 SSD | Yes                |  301s         | 730 MB
 HDD | No                | 457s           | 24 GB
 HDD | Yes               | 525s           | 730 MB
@@ -84,11 +82,11 @@ Produces the follow performance numbers (on a quad core system with 4GB JVM Heap
 Disk | `--compress` | Time           | File Size (Approx.)
 ------ | ----------------- | --------------- | -----------
 SSD | No                 | 140s          | 24 GB
-SSD | Yes                | 276s          | 730 MB
+SSD | Yes                | 216s          | 730 MB
 HDD | No                | 408s           | 24 GB
 HDD | Yes               | 424s           | 730 MB
 
-In both cases enabling compression roughly doubles the time taken on an SSD while on a HDD is only about 10% slower.
+In both cases enabling compression increases overall time taken by roughly 50% on an SSD while on a HDD is only about 10% slower.
 
 Remember that you can use the `--output` option to specify where the data files are generated and thus control what kind of disk the data is written to, if you fail to specify this then files are generated in your working directory i.e. where you launched the generator from.
 
