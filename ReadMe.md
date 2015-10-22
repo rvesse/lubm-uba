@@ -48,7 +48,7 @@ Using consolidation will reduce the number of files generated though total IO wi
 
 #### Compression
 
-The `--compress` option trades processing power for substantially reduced IO. The reduced IO is invaluable at larger scales, for example with 8000 universities and `--consolidate Full` the compressed N-Triples output file is 2.5 GB while the uncompressed output is 85 GB.
+The `--compress` option trades processing power for substantially reduced IO. The reduced IO is invaluable at larger scales, for example with 1000 universities and `--consolidate Full` the compressed N-Triples output file is 706 MB while the uncompressed output is 23 GB i.e. an approximately 32x compression ratio.
 
 #### Output Format
 
@@ -66,12 +66,14 @@ For example generating data like so:
 
 Produces the follow performance numbers (on a quad core system with 4GB JVM Heap):
 
-Disk | `--compress` | Time           | File Size (Approx.)
+Disk | `--compress` | Time           | Total File Sizes (Approx.)
 ------ | ----------------- | --------------- | -----------
 SSD | No                 | 171s          | 24 GB
-SSD | Yes                |  301s         | 730 MB
-HDD | No                | 457s           | 24 GB
-HDD | Yes               | 525s           | 730 MB
+SSD | Yes                |  216s         | 730 MB
+HDD | No                | 343s           | 24 GB
+HDD | Yes               | 392s           | 730 MB
+
+Enabling compression increases overall time taken by roughly 25% on a SSD but by only 15% on a HDD.
 
 For generating data like so:
 
@@ -79,14 +81,14 @@ For generating data like so:
 
 Produces the follow performance numbers (on a quad core system with 4GB JVM Heap):
 
-Disk | `--compress` | Time           | File Size (Approx.)
+Disk | `--compress` | Time           | Total File Sizes (Approx.)
 ------ | ----------------- | --------------- | -----------
-SSD | No                 | 140s          | 24 GB
-SSD | Yes                | 216s          | 730 MB
-HDD | No                | 408s           | 24 GB
-HDD | Yes               | 424s           | 730 MB
+SSD | No                 | 134s          | 24 GB
+SSD | Yes                | 262s          | 730 MB
+HDD | No                | 427s           | 24 GB
+HDD | Yes               | 407s           | 730 MB
 
-In both cases enabling compression increases overall time taken by roughly 50% on an SSD while on a HDD is only about 10% slower.
+Enabling compression increases overall time taken by roughly 100% on an SSD but leaves it about the same with an HDD.
 
 Remember that you can use the `--output` option to specify where the data files are generated and thus control what kind of disk the data is written to, if you fail to specify this then files are generated in your working directory i.e. where you launched the generator from.
 
@@ -115,4 +117,4 @@ For more information about the benchmark, visit its [homepage](http://www.lehigh
 
 You can file issues against this repository if they are specific to this version of the data generator.  While the generator here differs substantially from the original **all** changes have been implemented such that the data generated remains identical.
 
-The provided  `compareOutput.sh` script in this repository will generate data using the original code plus the rewritten code (using a variety of supported modes and output formats) and verifies that the generated data is identical.
+The provided  `compareOutput.sh` script in this repository will generate data using the original code plus the rewritten code (using a variety of the supported modes and output formats) and verifies that the generated data is identical.
