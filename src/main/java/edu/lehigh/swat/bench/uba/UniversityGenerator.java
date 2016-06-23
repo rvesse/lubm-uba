@@ -31,6 +31,7 @@ class UniversityGenerator implements Runnable {
         }
         
         try {
+            this.univState.prepare();
             _generateUniv(this.univState);
             this.univState.setComplete();
         } catch (Throwable e) {

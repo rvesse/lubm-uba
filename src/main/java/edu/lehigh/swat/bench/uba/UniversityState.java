@@ -30,32 +30,32 @@ public class UniversityState implements GeneratorCallbackTarget {
     private final int index;
 
     /** (class) instance information */
-    private final InstanceCount[] instances;
+    private InstanceCount[] instances;
 
     /** property instance information */
-    private final PropertyCount[] properties;
+    private PropertyCount[] properties;
 
     /**
      * list of undergraduate courses generated so far (in the current
      * department)
      */
-    private final ArrayList<CourseInfo> underCourses;
+    private ArrayList<CourseInfo> underCourses;
     /** list of graduate courses generated so far (in the current department) */
-    private final ArrayList<CourseInfo> gradCourses;
+    private ArrayList<CourseInfo> gradCourses;
     /**
      * list of remaining available undergraduate courses (in the current
      * department)
      */
-    private final ArrayList<Integer> remainingUnderCourses;
+    private ArrayList<Integer> remainingUnderCourses;
     /**
      * list of remaining available graduate courses (in the current department)
      */
-    private final ArrayList<Integer> remainingGradCourses;
+    private ArrayList<Integer> remainingGradCourses;
     /**
      * list of publication instances generated so far (in the current
      * department)
      */
-    private final ArrayList<PublicationInfo> publications;
+    private ArrayList<PublicationInfo> publications;
     /**
      * index of the full professor who has been chosen as the department chair
      */
@@ -70,7 +70,13 @@ public class UniversityState implements GeneratorCallbackTarget {
         this.index = index;
         this.seed = state.getBaseSeed() * (Integer.MAX_VALUE + 1) + index;
         this.random = new Random(seed);
+    }
 
+    /**
+     * Should be called before the first time this state is used, initializes
+     * the data structures needed for actual data generation to succeed
+     */
+    public void prepare() {
         this.instances = new InstanceCount[Ontology.CLASS_NUM];
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
             this.instances[i] = new InstanceCount();
@@ -111,19 +117,42 @@ public class UniversityState implements GeneratorCallbackTarget {
     public void setComplete() {
         this.completed = true;
 
+        cleanup();
+    }
+
+    private void cleanup() {
         // Throw away our reference to writer because it could be holding
         // various buffers which if we no longer need and as such should be GC'd
         this.writer = null;
+        
+        // Throw away all our temporary state
+        for (int i = 0; i < this.instances.length; i++) {
+            this.instances[i] = null;
+        }
+        this.instances = null;
+        for (int i = 0; i < this.properties.length; i++) {
+            this.properties[i] = null;
+        }
+        this.properties = null;
+        
+        underCourses.clear();
+        gradCourses.clear();
+        remainingUnderCourses.clear();
+        remainingGradCourses.clear();
+        publications.clear();
+        
+        underCourses = null;
+        gradCourses = null;
+        remainingUnderCourses = null;
+        remainingGradCourses = null;
+        publications = null;
     }
 
     public void setError(Throwable e) {
         this.error = e;
         this.state.incrementErrorCount();
 
-        // Throw away our reference to writer because it could be holding
-        // various buffers which if we've failed we no longer need and as such
-        // should be GC'd
-        this.writer = null;
+        cleanup();
     }
 
     public boolean hasError() {

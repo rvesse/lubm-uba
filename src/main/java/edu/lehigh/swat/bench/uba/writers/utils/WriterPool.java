@@ -54,7 +54,7 @@ public class WriterPool {
      * @return Output stream
      * @throws IOException
      */
-    public OutputStream getOutputStream() throws IOException {
+    public synchronized OutputStream getOutputStream() throws IOException {
         if (this.closed)
             throw new IllegalStateException("Writer pool has been closed");
 
@@ -96,7 +96,7 @@ public class WriterPool {
      * 
      * @return Writer ID
      */
-    public int getWriterId() {
+    public synchronized int getWriterId() {
         Integer i = this.threadIds.get();
         if (i == null) {
             // Get the writer for this thread to cause the ID to be allocated
