@@ -214,8 +214,10 @@ do
   echo "Output Format ${FORMAT} is all OK"
 
   # Clean Up
-  rm -f ${ST_BASE}/${FORMAT}/*${EXT}
-  rm -f ${MT_BASE}/${FORMAT}/*${EXT}
+  rm -f "${ST_BASE}/${FORMAT}/*${EXT}"
+  rm -f "${MT_BASE}/${FORMAT}/*${EXT}"
+  rm -f "${CON_SOME_BASE}/${FORMAT}/*${EXT}"
+  rm -f "${CON_FULL_BASE}/${FORMAT}/*${EXT}"
 done
 
 set +e
