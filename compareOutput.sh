@@ -199,13 +199,13 @@ do
     CONSOLIDATED_FILE="${CON_FULL_BASE}/${FORMAT}/Universities_orig.nt"
     if [ ! -e "${CONSOLIDATED_FILE}" ]; then
       riot --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/* > "${CONSOLIDATED_FILE}"
-      riot --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > "${CON_FULL_BASE}/${FORMAT}/Universities${EXT}"
+      riot --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt"
       set +e
 
-      rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities${EXT}" N3 ${LANG} http://example.org/ http://example.org/
+      rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt" N3 N3 http://example.org/ http://example.org/
       if [ $? -ne 0 ]; then
         echo "Fully consolidated output is different from non-consolidated outputs"
-        echo rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities${EXT}" N3 ${LANG} http://example.org/ http://example.org/
+        echo rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt" N3 N3 http://example.org/ http://example.org/
         exit 1
       fi
     fi
