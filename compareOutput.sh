@@ -185,7 +185,7 @@ do
     set -e
     CONSOLIDATED_FILE="${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt"
     if [ ! -e "${CONSOLIDATED_FILE}" ]; then
-      riot --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/${OUT_NAME}* > "${CONSOLIDATED_FILE}"
+      riot --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/${OUT_NAME}_* > "${CONSOLIDATED_FILE}"
       set +e
 
       rdfdiff "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt" "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}${EXT}" N3 ${LANG} http://example.org/ http://example.org/
