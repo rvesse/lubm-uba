@@ -55,7 +55,7 @@ public class Launcher {
 
     @Option(name = {
             "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format (default OWL)")
-    @AllowedRawValues(allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE" })
+    @AllowedRawValues(allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE", "GRAPHML", "GRAPHML_LABELLED" })
     private WriterType format = WriterType.OWL;
 
     @Option(name = { "--onto",

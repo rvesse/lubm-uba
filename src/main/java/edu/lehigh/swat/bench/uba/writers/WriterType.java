@@ -4,5 +4,7 @@ public enum WriterType {
  OWL,
  DAML,
  NTRIPLES,
- TURTLE
+ TURTLE,
+ GRAPHML,
+ GRAPHML_LABELLED
 }

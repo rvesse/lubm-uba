@@ -203,6 +203,9 @@ public class GlobalState {
             return ".nt";
         case TURTLE:
             return ".ttl";
+        case GRAPHML:
+        case GRAPHML_LABELLED:
+            return ".graphml";
         default:
             throw new RuntimeException("Unknown writer type");
         }

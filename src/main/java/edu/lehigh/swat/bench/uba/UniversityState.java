@@ -15,6 +15,9 @@ import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
 import edu.lehigh.swat.bench.uba.writers.OwlWriter;
 import edu.lehigh.swat.bench.uba.writers.TurtleWriter;
 import edu.lehigh.swat.bench.uba.writers.Writer;
+import edu.lehigh.swat.bench.uba.writers.WriterType;
+import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLFormatter;
+import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLWriter;
 
 public class UniversityState implements GeneratorCallbackTarget {
 
@@ -104,6 +107,10 @@ public class UniversityState implements GeneratorCallbackTarget {
             break;
         case TURTLE:
             writer = new TurtleWriter(this, state.getOntologyUrl());
+            break;
+        case GRAPHML:
+        case GRAPHML_LABELLED:
+            writer = new GraphMLWriter(this, state.getWriterType() == WriterType.GRAPHML_LABELLED);
             break;
         default:
             throw new RuntimeException("Invalid writer type specified");
