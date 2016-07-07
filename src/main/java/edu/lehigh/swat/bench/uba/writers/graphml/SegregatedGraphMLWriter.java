@@ -2,9 +2,9 @@ package edu.lehigh.swat.bench.uba.writers.graphml;
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 
-public class GraphMLWriter extends FormattingPropertyGraphWriter {
+public class SegregatedGraphMLWriter extends SegregatedFormattingPropertyGraphWriter {
 
-    public GraphMLWriter(GeneratorCallbackTarget callbackTarget) {
+    public SegregatedGraphMLWriter(GeneratorCallbackTarget callbackTarget) {
         super(callbackTarget, new GraphMLFormatter());
     }
 

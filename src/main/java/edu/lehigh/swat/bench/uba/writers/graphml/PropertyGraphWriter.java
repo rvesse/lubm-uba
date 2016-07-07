@@ -25,32 +25,26 @@
  */
 package edu.lehigh.swat.bench.uba.writers.graphml;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.Stack;
 
-import edu.lehigh.swat.bench.uba.Generator;
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.GlobalState;
-import edu.lehigh.swat.bench.uba.UniversityState;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.AbstractWriter;
 import edu.lehigh.swat.bench.uba.writers.Writer;
-import edu.lehigh.swat.bench.uba.writers.WriterVocabulary;
 
 public abstract class PropertyGraphWriter extends AbstractWriter implements Writer {
 
-    private UniversityState state;
     private Stack<Node> subjects = new Stack<>();
     private boolean isAboutSection;
-    private HashSet<String> universities;
-    private HashSet<String> requiredUniversities;
-    private HashMap<String, Node> graduateStudents;
+    private Set<String> universities = new HashSet<>();
+    private Set<String> requiredUniversities = new HashSet<>();
+    private Map<String, Node> graduateStudents = new HashMap<>();
     private boolean isGraduateStudent;
 
     public PropertyGraphWriter(GeneratorCallbackTarget callbackTarget) {
@@ -59,6 +53,7 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
 
     @Override
     public void startFile(String fileName, GlobalState state) {
+        this.out = prepareOutputStream(fileName, state);
     }
 
     @Override
@@ -66,7 +61,11 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
         storeGraduateStudents();
         storeRequiredUniversities();
 
-        cleanupOutputStream();
+        try {
+            cleanupOutputStream(this.out);
+        } finally {
+            this.out = null;
+        }
     }
 
     protected abstract void writeNode(Node n);
@@ -143,13 +142,15 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
         Node n = subjects.peek();
         Edge e = new Edge(Ontology.PROP_TOKEN[property], n.getId(), valueId);
         writeEdge(e);
-        if (property == Ontology.CS_P_UNDERGRADFROM || property == Ontology.CS_P_GRADFROM || property == Ontology.CS_P_DOCFROM) {
+        if (property == Ontology.CS_P_UNDERGRADFROM || property == Ontology.CS_P_GRADFROM
+                || property == Ontology.CS_P_DOCFROM) {
             requiredUniversities.add(valueId);
         }
     }
 
     private void storeRequiredUniversities() {
-        // TODO In a multi-threaded environment this could produce duplicate nodes
+        // TODO In a multi-threaded environment this could produce duplicate
+        // nodes
         for (String university : requiredUniversities) {
             if (!universities.contains(university)) {
                 Node n = new Node(university, Ontology.CLASS_TOKEN[Ontology.CS_C_UNIV]);
@@ -158,7 +159,7 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
                 writeNode(n);
             }
         }
-        
+
     }
 
     private void storeGraduateStudents() {

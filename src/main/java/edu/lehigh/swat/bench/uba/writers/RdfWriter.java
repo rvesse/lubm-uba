@@ -39,7 +39,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
      */
     public void startFile(String fileName, GlobalState state) {
         String s;
-        prepareOutputStream(fileName, state);
+        this.out = prepareOutputStream(fileName, state);
 
         // XML header
         s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
@@ -60,7 +60,11 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         s = "</" + WriterVocabulary.T_RDF_PREFIX + "RDF>";
         out.println(s);
 
-        cleanupOutputStream();
+        try {
+            cleanupOutputStream(this.out);
+        } finally {
+            this.out = null;
+        }
     }
 
     /**
@@ -69,7 +73,8 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     public void startSection(int classType, String id) {
         callbackTarget.startSectionCB(classType);
         out.println();
-        String s = "<" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE + WriterVocabulary.T_RDF_ABOUT + "=\"" + id + "\">";
+        String s = "<" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE
+                + WriterVocabulary.T_RDF_ABOUT + "=\"" + id + "\">";
         out.println(s);
     }
 
@@ -79,7 +84,8 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     public void startAboutSection(int classType, String id) {
         callbackTarget.startAboutSectionCB(classType);
         out.println();
-        String s = "<" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE + WriterVocabulary.T_RDF_ABOUT + "=\"" + id + "\">";
+        String s = "<" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + T_SPACE
+                + WriterVocabulary.T_RDF_ABOUT + "=\"" + id + "\">";
         out.println(s);
     }
 
@@ -99,10 +105,11 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
 
         String s;
         if (isResource) {
-            s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + T_SPACE + WriterVocabulary.T_RDF_RES + "=\"" + value + "\" />";
+            s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + T_SPACE
+                    + WriterVocabulary.T_RDF_RES + "=\"" + value + "\" />";
         } else { // literal
-            s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">" + value + "</" + WriterVocabulary.T_ONTO_PREFIX
-                    + Ontology.PROP_TOKEN[property] + ">";
+            s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">" + value + "</"
+                    + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">";
         }
 
         out.println(s);
@@ -116,9 +123,10 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         callbackTarget.addValueClassCB(valueClass);
 
         String s;
-        s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">\n" + "      <" + WriterVocabulary.T_ONTO_PREFIX
-                + Ontology.CLASS_TOKEN[valueClass] + T_SPACE + WriterVocabulary.T_RDF_ABOUT + "=\"" + valueId + "\" />" + "   </"
-                + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">";
+        s = "   <" + WriterVocabulary.T_ONTO_PREFIX + Ontology.PROP_TOKEN[property] + ">\n" + "      <"
+                + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[valueClass] + T_SPACE
+                + WriterVocabulary.T_RDF_ABOUT + "=\"" + valueId + "\" />" + "   </" + WriterVocabulary.T_ONTO_PREFIX
+                + Ontology.PROP_TOKEN[property] + ">";
 
         out.println(s);
     }

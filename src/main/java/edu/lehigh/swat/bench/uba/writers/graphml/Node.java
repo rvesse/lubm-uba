@@ -12,7 +12,7 @@ public class Node {
     private final Map<String, String> properties = new HashMap<String, String>();
 
     public Node(String id) {
-        this(id, null);
+        this(id, (String[])null);
     }
 
     public Node(String id, String... labels) {

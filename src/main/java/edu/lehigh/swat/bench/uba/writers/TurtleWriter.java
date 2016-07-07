@@ -18,7 +18,7 @@ public class TurtleWriter extends FlatWriter {
 
     @Override
     public void startFile(String fileName, GlobalState state) {
-        prepareOutputStream(fileName, state);
+        this.out = prepareOutputStream(fileName, state);
 
         // Add prefix declarations
         prefix(WriterVocabulary.T_RDF_NS, WriterVocabulary.T_RDF_NS_URI);

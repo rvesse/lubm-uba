@@ -1,5 +1,7 @@
 package edu.lehigh.swat.bench.uba.writers.graphml;
 
+import java.io.PrintStream;
+
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 
 public abstract class FormattingPropertyGraphWriter extends PropertyGraphWriter {
@@ -15,12 +17,20 @@ public abstract class FormattingPropertyGraphWriter extends PropertyGraphWriter 
 
     @Override
     protected void writeNode(Node n) {
-        this.formatter.formatNode(n, this.out);
+        this.formatter.formatNode(n, getNodeOutput());
+    }
+
+    protected PrintStream getNodeOutput() {
+        return this.out;
+    }
+    
+    protected PrintStream getEdgeOutput() {
+        return this.out;
     }
 
     @Override
     protected void writeEdge(Edge e) {
-        this.formatter.formatEdge(e, this.out);
+        this.formatter.formatEdge(e, getEdgeOutput());
     }
 
 }

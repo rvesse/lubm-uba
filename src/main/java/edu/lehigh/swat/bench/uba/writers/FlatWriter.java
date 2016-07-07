@@ -11,7 +11,7 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
     protected static final String RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
     protected static final String OWL_ONTOLOGY = "http://www.w3.org/2002/07/owl#Ontology";
     protected static final String OWL_IMPORTS = "http://www.w3.org/2002/07/owl#imports";
-    
+
     protected final String ontologyUrl;
     private final Stack<String> subjects = new Stack<String>();
 
@@ -22,7 +22,7 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
 
     @Override
     public void startFile(String fileName, GlobalState state) {
-        prepareOutputStream(fileName, state);
+        this.out = prepareOutputStream(fileName, state);
         addOntologyDeclaration();
     }
 
@@ -38,7 +38,11 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
     public void endFile(GlobalState state) {
         if (!subjects.isEmpty())
             throw new RuntimeException("Mismatched calls to writer in endFile()");
-        cleanupOutputStream();
+        try {
+            cleanupOutputStream(this.out);
+        } finally {
+            this.out = null;
+        }
 
     }
 
@@ -90,7 +94,7 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
     @Override
     public final void addProperty(int property, String value, boolean isResource) {
         callbackTarget.addPropertyCB(property);
-        
+
         if (this.subjects.isEmpty())
             throw new RuntimeException("Mismatched calls to writer in addProperty()");
 
@@ -102,7 +106,7 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
     public final void addProperty(int property, int valueClass, String valueId) {
         callbackTarget.addPropertyCB(property);
         callbackTarget.addValueClassCB(valueClass);
-        
+
         if (this.subjects.isEmpty())
             throw new RuntimeException("Mismatched calls to writer in addTypedProperty()");
 

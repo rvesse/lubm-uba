@@ -33,7 +33,7 @@ public class AbstractWriter {
      * @param state
      *            State
      */
-    protected final void prepareOutputStream(String fileName, GlobalState state) {
+    protected final PrintStream prepareOutputStream(String fileName, GlobalState state) {
         if (state.consolidationMode() != ConsolidationMode.Full) {
             try {
                 // Prepare the output stream
@@ -43,19 +43,19 @@ public class AbstractWriter {
                 } else {
                     stream = new BufferedOutputStream(stream, BufferSizes.OUTPUT_BUFFER_SIZE);
                 }
-                out = new PrintStream(stream);
+                return new PrintStream(stream);
             } catch (IOException e) {
                 throw new RuntimeException("Create file failure!", e);
             }
         } else {
-            out = new PrintStream(new MemoryBufferedOutputStream(state));
+            return new PrintStream(new MemoryBufferedOutputStream(state));
         }
     }
 
     /**
      * Cleans up the output stream
      */
-    protected final void cleanupOutputStream() {
+    protected final void cleanupOutputStream(PrintStream out) {
         if (out.checkError()) {
             // Make sure to null out the output stream when we're done because
             // the nature of how we do multi-threading means we have lots of
