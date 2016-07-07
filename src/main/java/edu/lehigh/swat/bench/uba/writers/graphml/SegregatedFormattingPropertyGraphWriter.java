@@ -22,6 +22,7 @@ public class SegregatedFormattingPropertyGraphWriter extends FormattingPropertyG
         
         this.out = prepareOutputStream(nodeFilename, state);
         this.edgeOut = prepareOutputStream(edgeFilename, state);
+        this.state = state;
     }
     
     @Override

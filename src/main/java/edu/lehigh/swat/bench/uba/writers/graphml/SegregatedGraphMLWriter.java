@@ -4,8 +4,8 @@ import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 
 public class SegregatedGraphMLWriter extends SegregatedFormattingPropertyGraphWriter {
 
-    public SegregatedGraphMLWriter(GeneratorCallbackTarget callbackTarget) {
-        super(callbackTarget, new GraphMLFormatter());
+    public SegregatedGraphMLWriter(GeneratorCallbackTarget callbackTarget, boolean neo4j) {
+        super(callbackTarget, new GraphMLFormatter(neo4j));
     }
 
 }

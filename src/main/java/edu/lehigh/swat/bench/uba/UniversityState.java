@@ -15,8 +15,6 @@ import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
 import edu.lehigh.swat.bench.uba.writers.OwlWriter;
 import edu.lehigh.swat.bench.uba.writers.TurtleWriter;
 import edu.lehigh.swat.bench.uba.writers.Writer;
-import edu.lehigh.swat.bench.uba.writers.WriterType;
-import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLFormatter;
 import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLWriter;
 import edu.lehigh.swat.bench.uba.writers.graphml.SegregatedGraphMLWriter;
 
@@ -110,10 +108,13 @@ public class UniversityState implements GeneratorCallbackTarget {
             writer = new TurtleWriter(this, state.getOntologyUrl());
             break;
         case GRAPHML:
-            writer = new GraphMLWriter(this);
+            writer = new GraphMLWriter(this, false);
             break;
-        case GRAPHML_SEGREGATED:
-            writer = new SegregatedGraphMLWriter(this);
+        case GRAPHML_NODESFIRST:
+            writer = new SegregatedGraphMLWriter(this, false);
+            break;
+        case NEO4J_GRAPHML:
+            writer = new SegregatedGraphMLWriter(this, true);
             break;
         default:
             throw new RuntimeException("Invalid writer type specified");

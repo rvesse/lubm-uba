@@ -40,10 +40,11 @@ import edu.lehigh.swat.bench.uba.writers.Writer;
 
 public abstract class PropertyGraphWriter extends AbstractWriter implements Writer {
 
+    private static Set<String> requiredUniversities = new HashSet<>();
+
+    protected GlobalState state;
     private Stack<Node> subjects = new Stack<>();
     private boolean isAboutSection;
-    private Set<String> universities = new HashSet<>();
-    private Set<String> requiredUniversities = new HashSet<>();
     private Map<String, Node> graduateStudents = new HashMap<>();
     private boolean isGraduateStudent;
 
@@ -54,12 +55,12 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
     @Override
     public void startFile(String fileName, GlobalState state) {
         this.out = prepareOutputStream(fileName, state);
+        this.state = state;
     }
 
     @Override
     public void endFile(GlobalState state) {
         storeGraduateStudents();
-        storeRequiredUniversities();
 
         try {
             cleanupOutputStream(this.out);
@@ -81,9 +82,7 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
         n.getProperties().put("type", Ontology.CLASS_TOKEN[classType]);
         subjects.push(n);
 
-        if (classType == Ontology.CS_C_UNIV) {
-            universities.add(id);
-        } else if (classType == Ontology.CS_C_GRADSTUD) {
+        if (classType == Ontology.CS_C_GRADSTUD) {
             graduateStudents.put(id, n);
             isGraduateStudent = true;
         }
@@ -144,22 +143,30 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
         writeEdge(e);
         if (property == Ontology.CS_P_UNDERGRADFROM || property == Ontology.CS_P_GRADFROM
                 || property == Ontology.CS_P_DOCFROM) {
-            requiredUniversities.add(valueId);
-        }
-    }
 
-    private void storeRequiredUniversities() {
-        // TODO In a multi-threaded environment this could produce duplicate
-        // nodes
-        for (String university : requiredUniversities) {
-            if (!universities.contains(university)) {
-                Node n = new Node(university, Ontology.CLASS_TOKEN[Ontology.CS_C_UNIV]);
-                n.getProperties().put("uri", university);
-                n.getProperties().put("type", Ontology.CLASS_TOKEN[Ontology.CS_C_UNIV]);
-                writeNode(n);
+            // Is this a university that won't be generated?
+            // i.e. is it's numeric ID outside the range startIndex to
+            // (startIndex + numUniversites - 1)
+            int idStartPos = valueId.lastIndexOf('y') + 1;
+            int idEndPos = valueId.lastIndexOf('.');
+            int univId = Integer.parseInt(valueId.substring(idStartPos, idEndPos));
+            if (univId < this.state.getStartIndex()
+                    || univId >= this.state.getStartIndex() + this.state.getNumberUniversities()) {
+                synchronized (requiredUniversities) {
+                    if (!requiredUniversities.contains(valueId)) {
+                        // Generate university now
+                        Node u = new Node(valueId, Ontology.CLASS_TOKEN[Ontology.CS_C_UNIV]);
+                        u.getProperties().put("uri", valueId);
+                        u.getProperties().put("type", Ontology.CLASS_TOKEN[Ontology.CS_C_UNIV]);
+                        writeNode(u);
+
+                        // Remember we've generated it
+                        requiredUniversities.add(valueId);
+                    }
+                }
             }
-        }
 
+        }
     }
 
     private void storeGraduateStudents() {

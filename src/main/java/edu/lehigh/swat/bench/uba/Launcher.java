@@ -27,9 +27,16 @@ import com.github.rvesse.airline.parser.errors.ParseException;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
 
+//@formatter:off
 @Command(name = "generate.sh", description = "Artificial Data Generator for the Lehigh University Benchmark (LUBM) for SPARQL query engines")
-@ExitCodes(codes = { 0, 1, 2, 3 }, descriptions = { "Data was generated successfully", "Help was displayed",
-        "Invalid arguments", "Error during data generation" })
+@ExitCodes(codes = { 0, 1, 2, 3 }, 
+           descriptions = { 
+             "Data was generated successfully", 
+             "Help was displayed",
+             "Invalid arguments", 
+             "Error during data generation"
+           })
+//@formatter:on
 public class Launcher {
 
     /** name of the log file */
@@ -55,7 +62,7 @@ public class Launcher {
 
     @Option(name = { "-f",
             "--format" }, title = "OutputFormat", arity = 1, description = "Sets the desired output format (default OWL)")
-    @AllowedRawValues(allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE", "GRAPHML", "GRAPHML_SEGREGATED" })
+    @AllowedRawValues(allowedValues = { "OWL", "DAML", "NTRIPLES", "TURTLE", "GRAPHML", "GRAPHML_NODESFIRST", "NEO4J_GRAPHML" })
     private WriterType format = WriterType.OWL;
 
     @Option(name = { "--onto",

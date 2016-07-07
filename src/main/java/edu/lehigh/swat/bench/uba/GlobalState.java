@@ -204,7 +204,8 @@ public class GlobalState {
         case TURTLE:
             return ".ttl";
         case GRAPHML:
-        case GRAPHML_SEGREGATED:
+        case GRAPHML_NODESFIRST:
+        case NEO4J_GRAPHML:
             return ".graphml";
         default:
             throw new RuntimeException("Unknown writer type");
