@@ -130,6 +130,10 @@ public class Generator {
     }
 
     private void notAllGeneratorsFinished(GlobalState state) {
+        if (state.getWriteConsolidator() != null) {
+            state.getWriteConsolidator().cancel();
+        }
+        
         throw new RuntimeException("Not all university generators finished successfully, see log for details");
     }
 }

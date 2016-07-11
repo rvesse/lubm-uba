@@ -1,20 +1,16 @@
 package edu.lehigh.swat.bench.uba;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.zip.GZIPOutputStream;
-
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
-import edu.lehigh.swat.bench.uba.writers.utils.BufferSizes;
+import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLConsolidator;
+import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLNodesThenEdgesConsolidator;
+import edu.lehigh.swat.bench.uba.writers.utils.WriteConsolidator;
 import edu.lehigh.swat.bench.uba.writers.utils.WriterPool;
 
 public class GlobalState {
@@ -37,16 +33,17 @@ public class GlobalState {
     private final File outputDir;
     private final boolean compress, quiet;
     private final ConsolidationMode consolidate;
-    private OutputStream consolidatedOutput;
 
     private final int threads;
     private final ExecutorService executorService;
     private final long executionTimeout;
     private final TimeUnit executionTimeoutUnit;
     private final AtomicLong errorCount = new AtomicLong(0);
-    
+
     private final WriterPool writerPool;
-        
+    private final WriteConsolidator writeConsolidator;
+    private final ExecutorService consolidatorService = Executors.newSingleThreadExecutor();
+
     public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir,
             ConsolidationMode consolidate, boolean compress, int threads, long executionTimeout,
             TimeUnit executionTimeoutUnit, boolean quiet) {
@@ -61,30 +58,6 @@ public class GlobalState {
         this.quiet = quiet;
         this.executionTimeout = executionTimeout;
         this.executionTimeoutUnit = executionTimeoutUnit;
-
-        if (this.consolidate == ConsolidationMode.Full) {
-            StringBuilder fileName = new StringBuilder();
-            fileName.append(this.outputDir.getAbsolutePath());
-            if (fileName.charAt(fileName.length() - 1) != File.separatorChar)
-                fileName.append(File.separatorChar);
-            fileName.append("Universities");
-            fileName.append(this.getFileExtension());
-            if (this.compress) {
-                fileName.append(".gz");
-            }
-            try {
-                this.consolidatedOutput = new FileOutputStream(fileName.toString());
-                if (this.compress) {
-                    this.consolidatedOutput = new GZIPOutputStream(this.consolidatedOutput, BufferSizes.GZIP_BUFFER_SIZE);
-                } else {
-                    this.consolidatedOutput = new BufferedOutputStream(this.consolidatedOutput, BufferSizes.OUTPUT_BUFFER_SIZE);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(String.format("Failed to prepare consolidated output file %s", fileName), e);
-            }
-        } else {
-            this.consolidatedOutput = null;
-        }
 
         this.totalInstancesGenerated = new AtomicLong[Ontology.CLASS_NUM];
         for (int i = 0; i < Ontology.CLASS_NUM; i++) {
@@ -102,12 +75,34 @@ public class GlobalState {
             this.threads = threads;
             this.executorService = Executors.newFixedThreadPool(threads);
         }
-        
+
         if (this.consolidationMode() == ConsolidationMode.Full) {
             // Set up background writer service appropriately
             this.writerPool = new WriterPool(this);
         } else {
             this.writerPool = null;
+        }
+
+        StringBuilder consolidatedFileName = new StringBuilder();
+        consolidatedFileName.append(this.outputDir.getAbsolutePath());
+        if (consolidatedFileName.charAt(consolidatedFileName.length() - 1) != File.separatorChar)
+            consolidatedFileName.append(File.separatorChar);
+        consolidatedFileName.append("Universities");
+        consolidatedFileName.append(this.getFileExtension());
+        if (this.compress) {
+            consolidatedFileName.append(".gz");
+        }
+
+        switch (this.writerType) {
+        case GRAPHML:
+            this.writeConsolidator = new GraphMLConsolidator(consolidatedFileName.toString());
+            break;
+        case GRAPHML_NODESFIRST:
+        case NEO4J_GRAPHML:
+            this.writeConsolidator = new GraphMLNodesThenEdgesConsolidator(consolidatedFileName.toString());
+            break;
+        default:
+            this.writeConsolidator = null;
         }
     }
 
@@ -146,7 +141,7 @@ public class GlobalState {
     public boolean isQuietMode() {
         return this.quiet;
     }
-    
+
     public int getThreads() {
         return this.threads;
     }
@@ -178,11 +173,11 @@ public class GlobalState {
     public long getTotalProperties(int propType) {
         return this.totalPropertiesGenerated[propType].get();
     }
-    
+
     public void incrementErrorCount() {
         this.errorCount.incrementAndGet();
     }
-    
+
     public boolean shouldContinue() {
         return this.errorCount.get() == 0;
     }
@@ -211,19 +206,45 @@ public class GlobalState {
             throw new RuntimeException("Unknown writer type");
         }
     }
-    
+
     public WriterPool getWriterPool() {
         return this.writerPool;
     }
-    
+
+    public WriteConsolidator getWriteConsolidator() {
+        return this.writeConsolidator;
+    }
+
     public void start() {
-        // No start actions currently
+
+        if (this.writeConsolidator != null) {
+            this.consolidatorService.submit(this.writeConsolidator);
+            while (!this.writeConsolidator.wasStarted()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // Ignore and continue waiting
+                }
+            }
+        }
     }
 
     public void finish() {
         if (this.consolidationMode() == ConsolidationMode.Full) {
             // Close the writer pool
             this.writerPool.close();
+        }
+
+        // Wait for write consolidation
+        if (this.writeConsolidator != null) {
+            this.writeConsolidator.finish();
+
+            this.consolidatorService.shutdown();
+            try {
+                this.consolidatorService.awaitTermination(executionTimeout, executionTimeoutUnit);
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Write consolidation failed to terminate", e);
+            }
         }
     }
 }

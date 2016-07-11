@@ -22,6 +22,6 @@ public class BufferSizes {
     /**
      * Buffer size used for uncompressed output
      */
-    public static int OUTPUT_BUFFER_SIZE = 65 * 1024;
+    public static int OUTPUT_BUFFER_SIZE = 64 * 1024;
 
 }

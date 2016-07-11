@@ -65,6 +65,8 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         } finally {
             this.out = null;
         }
+        
+        this.submitWrites();
     }
 
     /**

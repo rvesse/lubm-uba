@@ -119,6 +119,7 @@ public class WriterPool {
         this.closed = true;
 
         // Try to close each output stream
+        WriteConsolidator consolidator = this.state.getWriteConsolidator();
         List<Throwable> errors = new ArrayList<>();
         synchronized (this.writers) {
             for (int i = 0; i < this.writers.size(); i++) {
@@ -129,6 +130,10 @@ public class WriterPool {
                     output.close();
 
                     System.out.println(String.format("%s generated", filename));
+
+                    // Submit for consolidation if applicable
+                    if (consolidator != null)
+                        consolidator.addFile(filename);
                 } catch (IOException e) {
                     // Log and track errors
                     errors.add(e);

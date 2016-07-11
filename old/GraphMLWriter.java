@@ -36,14 +36,7 @@ import edu.lehigh.swat.bench.uba.Generator;
 import edu.lehigh.swat.bench.uba.writers.Writer;
 
 public class GraphMLWriter implements Writer {
-	private static final String HEADER = "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n"
-			+ "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-			+ "xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns\n"
-			+ "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">";
-	private static final String END = "</graphml>"; 	
-	private static final String GRAPH_START = "<graph id=\"LUMB\" edgedefault=\"directed\">";
-	private static final String GRAPH_END = "</graph>";
-	private static final boolean[] IS_NODE_ATTRIBUTE = { true, false, false, false, false, false, false, false, false, false, false, false, true, true, false, false };
+
 	
 	private Generator generator;
 	private PrintStream out;

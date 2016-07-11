@@ -37,6 +37,7 @@ public class SegregatedFormattingPropertyGraphWriter extends FormattingPropertyG
         } finally {
             try {
                 this.cleanupOutputStream(this.edgeOut);
+                this.submitWrites();
             } finally {
                 this.edgeOut = null;
             }
