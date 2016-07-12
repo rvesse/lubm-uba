@@ -18,10 +18,10 @@ public class GraphMLConsolidator extends SingleFileConsolidator {
         PrintStream print = new PrintStream(output);
         print.println(GraphMLVocabulary.HEADER);
 
-        print.println("<key id=\"type\" for=\"node\" attr.name=\"type\" attr.type=\"string\"/>");
-        print.println("<key id=\"uri\" for=\"node\" attr.name=\"uri\" attr.type=\"string\"/>");
+        print.println("<key id=\"type\" for=\"node\" attr.name=\"type\" attr.type=\"string\" />");
+        print.println("<key id=\"uri\" for=\"node\" attr.name=\"uri\" attr.type=\"string\" />");
         print.println(
-                "<key id=\"researchAssistant\" for=\"node\" attr.name=\"researchAssistant\" attr.type=\"boolean\"/>");
+                "<key id=\"researchAssistant\" for=\"node\" attr.name=\"researchAssistant\" attr.type=\"boolean\" />");
         for (int index = 0; index < Ontology.PROP_TOKEN.length; index++) {
             print.print("<key id=\"");
             print.print(Ontology.PROP_TOKEN[index]);
@@ -33,7 +33,7 @@ public class GraphMLConsolidator extends SingleFileConsolidator {
             }
             print.print("\" attr.name=\"");
             print.print(Ontology.PROP_TOKEN[index]);
-            print.println("\" attr.type=\"string\"/>");
+            print.println("\" attr.type=\"string\" />");
         }
 
         print.println(GraphMLVocabulary.GRAPH_START);

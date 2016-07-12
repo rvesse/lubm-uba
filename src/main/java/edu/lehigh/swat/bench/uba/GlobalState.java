@@ -1,9 +1,12 @@
 package edu.lehigh.swat.bench.uba;
 
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
@@ -43,6 +46,7 @@ public class GlobalState {
     private final WriterPool writerPool;
     private final WriteConsolidator writeConsolidator;
     private final ExecutorService consolidatorService = Executors.newSingleThreadExecutor();
+    private Future<Long> consolidatorFuture;
 
     public GlobalState(int univNum, long baseSeed, int startIndex, String ontologyUrl, WriterType type, File outputDir,
             ConsolidationMode consolidate, boolean compress, int threads, long executionTimeout,
@@ -218,7 +222,7 @@ public class GlobalState {
     public void start() {
 
         if (this.writeConsolidator != null) {
-            this.consolidatorService.submit(this.writeConsolidator);
+            this.consolidatorFuture = this.consolidatorService.submit(this.writeConsolidator);
             while (!this.writeConsolidator.wasStarted()) {
                 try {
                     Thread.sleep(100);
@@ -241,9 +245,13 @@ public class GlobalState {
 
             this.consolidatorService.shutdown();
             try {
-                this.consolidatorService.awaitTermination(executionTimeout, executionTimeoutUnit);
+                this.consolidatorFuture.get(this.executionTimeout, this.executionTimeoutUnit);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Write consolidation failed to terminate", e);
+            } catch (ExecutionException e) {
+                throw new RuntimeException("Write consolidation failed", e);
+            } catch (TimeoutException e) {
+                throw new RuntimeException("Write consolidation exceeded timeout");
             }
         }
     }

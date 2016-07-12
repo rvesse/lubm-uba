@@ -13,7 +13,7 @@ public abstract class AbstractWriteConsolidator implements WriteConsolidator {
     protected final AtomicLong consolidated = new AtomicLong(0);
 
     @Override
-    public void run() {
+    public Long call() {
         try {
             this.started = true;
             while (!this.cancelled) {
@@ -58,7 +58,8 @@ public abstract class AbstractWriteConsolidator implements WriteConsolidator {
             }
 
             this.cleanupOutputs();
-            System.out.println("Finished write consolidation");
+            System.out.println(String.format("Finished write consolidation (%d/%d files)", this.consolidated.get(), this.queued.get()));
+            return this.consolidated.get();
         } catch (IOException e) {
             throw new RuntimeException("Write consolidation failed", e);
         }
@@ -89,7 +90,7 @@ public abstract class AbstractWriteConsolidator implements WriteConsolidator {
     public void finish() {
         this.finished = true;
     }
-    
+
     @Override
     public boolean wasStarted() {
         return this.started;

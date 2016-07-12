@@ -1,11 +1,13 @@
 package edu.lehigh.swat.bench.uba.writers.utils;
 
+import java.util.concurrent.Callable;
+
 /**
  * Interface for write consolidators
  * @author rvesse
  *
  */
-public interface WriteConsolidator extends Runnable {
+public interface WriteConsolidator extends Callable<Long> {
 
     /**
      * Should be called to indicate that the given file is ready for

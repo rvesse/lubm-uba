@@ -64,6 +64,7 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
 
         try {
             cleanupOutputStream(this.out);
+            this.submitWrites();
         } finally {
             this.out = null;
         }

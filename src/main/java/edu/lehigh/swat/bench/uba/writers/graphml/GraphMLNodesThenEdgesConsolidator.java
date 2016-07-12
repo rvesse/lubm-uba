@@ -6,7 +6,7 @@ import java.util.Queue;
 public class GraphMLNodesThenEdgesConsolidator extends GraphMLConsolidator {
 
     private final Queue<String> edgeFiles = new LinkedList<>();
-    
+
     public GraphMLNodesThenEdgesConsolidator(String targetFilename) {
         super(targetFilename);
     }
@@ -21,11 +21,14 @@ public class GraphMLNodesThenEdgesConsolidator extends GraphMLConsolidator {
                     synchronized (this.edgeFiles) {
                         return this.edgeFiles.poll();
                     }
+                } else {
+                    // No work for now
+                    return null;
                 }
             }
 
-            // Check if it is an edge file
-            if (file.endsWith("edges.graphml")) {
+            // Check if it is an edge file?
+            if (file.endsWith("edges.graphml") || file.endsWith("edges.graphml.gz")) {
                 // Queue it for later consolidation
                 synchronized (this.edgeFiles) {
                     this.edgeFiles.add(file);
