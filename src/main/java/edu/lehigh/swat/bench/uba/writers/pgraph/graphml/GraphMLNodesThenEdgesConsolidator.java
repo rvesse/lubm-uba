@@ -1,4 +1,4 @@
-package edu.lehigh.swat.bench.uba.writers.graphml;
+package edu.lehigh.swat.bench.uba.writers.pgraph.graphml;
 
 import java.util.LinkedList;
 import java.util.Queue;

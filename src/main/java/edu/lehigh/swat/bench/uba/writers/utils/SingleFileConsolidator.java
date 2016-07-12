@@ -1,16 +1,12 @@
 package edu.lehigh.swat.bench.uba.writers.utils;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 public class SingleFileConsolidator extends AbstractWriteConsolidator {
@@ -35,15 +31,6 @@ public class SingleFileConsolidator extends AbstractWriteConsolidator {
     protected String nextFile() {
         synchronized (this.files) {
             return this.files.poll();
-        }
-    }
-
-    @Override
-    protected InputStream openFile(String filename) throws IOException {
-        if (filename.endsWith(".gz")) {
-            return new GZIPInputStream(new FileInputStream(filename), BufferSizes.GZIP_BUFFER_SIZE);
-        } else {
-            return new BufferedInputStream(new FileInputStream(filename), BufferSizes.OUTPUT_BUFFER_SIZE);
         }
     }
 

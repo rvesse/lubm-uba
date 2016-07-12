@@ -1,7 +1,11 @@
-package edu.lehigh.swat.bench.uba.writers.graphml;
+package edu.lehigh.swat.bench.uba.writers.pgraph.graphml;
 
 import java.io.PrintStream;
 import java.util.Map.Entry;
+
+import edu.lehigh.swat.bench.uba.writers.graphml.Edge;
+import edu.lehigh.swat.bench.uba.writers.graphml.Node;
+import edu.lehigh.swat.bench.uba.writers.graphml.PropertyGraphFormatter;
 
 public class GraphMLFormatter implements PropertyGraphFormatter {
 

@@ -1,4 +1,4 @@
-package edu.lehigh.swat.bench.uba.writers.graphml;
+package edu.lehigh.swat.bench.uba.writers.pgraph.graphml;
 
 public class GraphMLVocabulary {
     public static final String HEADER = "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"\n"

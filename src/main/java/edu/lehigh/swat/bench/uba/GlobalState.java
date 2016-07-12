@@ -11,8 +11,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
-import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLConsolidator;
-import edu.lehigh.swat.bench.uba.writers.graphml.GraphMLNodesThenEdgesConsolidator;
+import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLConsolidator;
+import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLNodesThenEdgesConsolidator;
+import edu.lehigh.swat.bench.uba.writers.pgraph.json.JsonConsolidator;
 import edu.lehigh.swat.bench.uba.writers.utils.WriteConsolidator;
 import edu.lehigh.swat.bench.uba.writers.utils.WriterPool;
 
@@ -92,7 +93,8 @@ public class GlobalState {
         if (consolidatedFileName.charAt(consolidatedFileName.length() - 1) != File.separatorChar)
             consolidatedFileName.append(File.separatorChar);
         consolidatedFileName.append("Universities");
-        consolidatedFileName.append(this.getFileExtension());
+        String ext = this.getFileExtension();
+        consolidatedFileName.append(ext);
         if (this.compress) {
             consolidatedFileName.append(".gz");
         }
@@ -104,6 +106,11 @@ public class GlobalState {
         case GRAPHML_NODESFIRST:
         case NEO4J_GRAPHML:
             this.writeConsolidator = new GraphMLNodesThenEdgesConsolidator(consolidatedFileName.toString());
+            break;
+        case JSON:
+            String file = consolidatedFileName.toString();
+            this.writeConsolidator = new JsonConsolidator(file.replace(ext, "-nodes" + ext),
+                    file.replace(ext, "-edges" + ext));
             break;
         default:
             this.writeConsolidator = null;
@@ -206,6 +213,8 @@ public class GlobalState {
         case GRAPHML_NODESFIRST:
         case NEO4J_GRAPHML:
             return ".graphml";
+        case JSON:
+            return ".json";
         default:
             throw new RuntimeException("Unknown writer type");
         }

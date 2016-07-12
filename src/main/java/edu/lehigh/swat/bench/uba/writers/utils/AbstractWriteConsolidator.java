@@ -1,10 +1,13 @@
 package edu.lehigh.swat.bench.uba.writers.utils;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.zip.GZIPInputStream;
 
 public abstract class AbstractWriteConsolidator implements WriteConsolidator {
 
@@ -67,8 +70,6 @@ public abstract class AbstractWriteConsolidator implements WriteConsolidator {
 
     protected abstract String nextFile();
 
-    protected abstract InputStream openFile(String filename) throws IOException;
-
     protected abstract OutputStream getOutput(String filename) throws IOException;
 
     protected void writePreFile(OutputStream output) throws IOException {
@@ -94,6 +95,14 @@ public abstract class AbstractWriteConsolidator implements WriteConsolidator {
     @Override
     public boolean wasStarted() {
         return this.started;
+    }
+
+    protected InputStream openFile(String filename) throws IOException {
+        if (filename.endsWith(".gz")) {
+            return new GZIPInputStream(new FileInputStream(filename), BufferSizes.GZIP_BUFFER_SIZE);
+        } else {
+            return new BufferedInputStream(new FileInputStream(filename), BufferSizes.OUTPUT_BUFFER_SIZE);
+        }
     }
 
 }
