@@ -95,8 +95,8 @@ public class Launcher {
     private boolean compress = false;
 
     @Option(name = {
-            "--consolidate" }, arity = 1, description = "When set controls how many data files are generated and what data is placed into each file.  This defaults to None which produces one file per university department, Partial produces one file per university and Full produces a single file.")
-    @AllowedRawValues(allowedValues = { "None", "Partial", "Full" })
+            "--consolidate" }, arity = 1, description = "When set controls how many data files are generated and what data is placed into each file.  This defaults to None which produces one file per university department, Partial produces one file per university and Full produces a file per thread.  Maximal produces as few as files as possible, the exact number of files produced will depend on the target output format.")
+    @AllowedRawValues(allowedValues = { "None", "Partial", "Full", "Maximal" })
     private ConsolidationMode consolidate = ConsolidationMode.None;
 
     @Option(name = {

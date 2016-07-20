@@ -40,6 +40,7 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
             throw new RuntimeException("Mismatched calls to writer in endFile()");
         try {
             cleanupOutputStream(this.out);
+            this.submitWrites();
         } finally {
             this.out = null;
         }

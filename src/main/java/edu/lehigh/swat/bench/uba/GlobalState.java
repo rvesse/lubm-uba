@@ -14,6 +14,7 @@ import edu.lehigh.swat.bench.uba.writers.WriterType;
 import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLConsolidator;
 import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLNodesThenEdgesConsolidator;
 import edu.lehigh.swat.bench.uba.writers.pgraph.json.JsonConsolidator;
+import edu.lehigh.swat.bench.uba.writers.utils.SingleFileConsolidator;
 import edu.lehigh.swat.bench.uba.writers.utils.WriteConsolidator;
 import edu.lehigh.swat.bench.uba.writers.utils.WriterPool;
 
@@ -58,7 +59,6 @@ public class GlobalState {
         this.ontology = ontologyUrl;
         this.writerType = type;
         this.outputDir = outputDir;
-        this.consolidate = consolidate;
         this.compress = compress;
         this.quiet = quiet;
         this.executionTimeout = executionTimeout;
@@ -81,6 +81,33 @@ public class GlobalState {
             this.executorService = Executors.newFixedThreadPool(threads);
         }
 
+        // Adjust consolidation mode if Maximal is specified
+        if (consolidate == ConsolidationMode.Maximal) {
+            switch (this.writerType) {
+            case GRAPHML:
+            case GRAPHML_NODESFIRST:
+            case JSON:
+            case NEO4J_GRAPHML:
+                // All these formats will maximally consolidate regardless, using
+                // Partial should give the best IO balance
+                this.consolidate = ConsolidationMode.Partial;
+                break;
+            case NTRIPLES:
+            case TURTLE:
+                // All these formats can be trivially concatenated together so
+                // again using Partial should give the best IO balance and we'll
+                // need to add in a write consolidator
+                this.consolidate = ConsolidationMode.Partial;
+                break;
+            default:
+                // Otherwise default to full
+                this.consolidate = ConsolidationMode.Full;
+                break;
+            }
+        } else {
+            this.consolidate = consolidate;
+        }
+
         if (this.consolidationMode() == ConsolidationMode.Full) {
             // Set up background writer service appropriately
             this.writerPool = new WriterPool(this);
@@ -88,6 +115,7 @@ public class GlobalState {
             this.writerPool = null;
         }
 
+        // Prepare write consolidation if needed
         StringBuilder consolidatedFileName = new StringBuilder();
         consolidatedFileName.append(this.outputDir.getAbsolutePath());
         if (consolidatedFileName.charAt(consolidatedFileName.length() - 1) != File.separatorChar)
@@ -112,6 +140,12 @@ public class GlobalState {
             this.writeConsolidator = new JsonConsolidator(file.replace(ext, "-nodes" + ext),
                     file.replace(ext, "-edges" + ext));
             break;
+        case NTRIPLES:
+        case TURTLE:
+            if (consolidate == ConsolidationMode.Maximal) {
+                this.writeConsolidator = new SingleFileConsolidator(consolidatedFileName.toString());
+                break;
+            }
         default:
             this.writeConsolidator = null;
         }

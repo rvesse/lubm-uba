@@ -15,15 +15,16 @@ import edu.lehigh.swat.bench.uba.writers.utils.BufferSizes;
 
 public class JsonConsolidator extends AbstractWriteConsolidator {
     
-    private byte[] PRE_FILE = ",\n  ".getBytes(StandardCharsets.UTF_8);
-    private byte[] EDGE_HEADER = "{ \"edges\" :\n [\n  ".getBytes(StandardCharsets.UTF_8);
+    private byte[] PRE_FILE = ",\n".getBytes(StandardCharsets.UTF_8);
+    private byte[] EDGE_HEADER = "{ \"edges\" :\n [\n".getBytes(StandardCharsets.UTF_8);
     private byte[] EDGE_FOOTER = "\n ]\n}\n".getBytes(StandardCharsets.UTF_8);
-    private byte[] NODE_HEADER = "{ \"nodes\" :\n [\n  ".getBytes(StandardCharsets.UTF_8);
+    private byte[] NODE_HEADER = "{ \"nodes\" :\n [\n".getBytes(StandardCharsets.UTF_8);
     private byte[] NODE_FOOTER = "\n ]\n}\n".getBytes(StandardCharsets.UTF_8);
 
     private final Queue<String> files = new LinkedList<>();
     private final String nodeFilename, edgeFilename;
     private OutputStream nodeOutput, edgeOutput;
+    private boolean firstFile = true;
 
     public JsonConsolidator(String nodeFilename, String edgeFilename) {
         this.nodeFilename = nodeFilename;
@@ -57,6 +58,7 @@ public class JsonConsolidator extends AbstractWriteConsolidator {
                             BufferSizes.OUTPUT_BUFFER_SIZE);
                 }
                 this.edgeOutput.write(EDGE_HEADER);
+                this.firstFile = true;
             }
             return this.edgeOutput;
         } else {
@@ -69,6 +71,7 @@ public class JsonConsolidator extends AbstractWriteConsolidator {
                             BufferSizes.OUTPUT_BUFFER_SIZE);
                 }
                 this.nodeOutput.write(NODE_HEADER);
+                this.firstFile = true;
             }
             return this.nodeOutput;
         }
@@ -76,9 +79,10 @@ public class JsonConsolidator extends AbstractWriteConsolidator {
     
     @Override
     protected void writePreFile(OutputStream output) throws IOException {
-        if (this.consolidated.get() > 0) {
+        if (!this.firstFile) {
             output.write(PRE_FILE);
         }
+        this.firstFile = false;
     }
 
     @Override

@@ -3,6 +3,7 @@ package edu.lehigh.swat.bench.uba.writers.graphml;
 import java.io.PrintStream;
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
+import edu.lehigh.swat.bench.uba.GlobalState;
 
 public abstract class FormattingPropertyGraphWriter extends PropertyGraphWriter {
 
@@ -13,6 +14,12 @@ public abstract class FormattingPropertyGraphWriter extends PropertyGraphWriter 
         if (formatter == null)
             throw new NullPointerException("formatter cannot be null");
         this.formatter = formatter;
+    }
+
+    @Override
+    public void startFile(String fileName, GlobalState state) {
+        super.startFile(fileName, state);
+        this.formatter.newFile();
     }
 
     @Override

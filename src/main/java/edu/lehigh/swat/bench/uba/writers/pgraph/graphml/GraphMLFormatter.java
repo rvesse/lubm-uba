@@ -62,4 +62,9 @@ public class GraphMLFormatter implements PropertyGraphFormatter {
         }
     }
 
+    @Override
+    public void newFile() {
+        // No state to reset
+    }
+
 }
