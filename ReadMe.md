@@ -11,9 +11,10 @@ Data Generator for the LUBM Benchmark, this is the original code for the generat
     - Use a proper command line parsing library that provides meaningful built in help and parsing errors
     - New command line options:
         - Added `-o <dir>`/`--output <dir>` option to control where generated data files are written
-        - Added `--format <format>` option to control the output format, supports `OWL`, `DAML`, `NTRIPLES` and `TURTLE`
+        - Added `--format <format>` option to control the output format, supports `OWL`, `DAML`, `NTRIPLES`, `TURTLE`, `GRAPHML`, `GRAPHML_NODESFIRST`, `NEO4J_GRAPHML` and `JSON`
+            - The GraphML and JSON based formats are property graph encodings of the generated dataset
         - Added `--compress` option which compresses output files with GZip as they are generated
-        - Added `--consolidate <mode>` option which controls how many files are generates.  `None` generates 1 file per university department, `Partial` generates 1 file per university and `Full` generates a file per thread
+        - Added `--consolidate <mode>` option which controls how many files are generates.  `None` generates 1 file per university department, `Partial` generates 1 file per university and `Full` generates a file per thread.  `Maximal` tries to reduce the number of files as far as possible, exact number of files produces depends on the output format.
         - Added `-t <threads>`/`--threads <threads>` option to allow parallel data generation for better performance
         - Added `--quiet` option to reduce logging verbosity
         - Added `--max-time <minutes>` option to specify the maximum amount of time to allow data generation to run for before forcibly aborting
@@ -46,6 +47,10 @@ We strongly suggest using `--threads` to set the number of threads, typically yo
 
 Using consolidation will reduce the number of files generated though total IO will be roughly the same. With `--consolidate Partial` you get a file per university (which can still be a lot of files at scale) while `--consolidate Full` will produce a single file per-thread which provides the least number of files while still giving good parallel throughput.
 
+Some data formats e.g. the property graph ones require producing single files in which case two pass writes are used to balance IO contention across threads. Each thread generates files which are then registered with a background thread which combines these into a final file.
+
+There are other data formats such as N-Triples and Turtle where this additional consolidation maybe optionally enabled by setting `--consolidate Maximal`. When you use this is setting the generator will select an optimal consolidation mode to use for the data format in question and apply any necessary two pass consolidation.
+
 #### Compression
 
 The `--compress` option trades processing power for substantially reduced IO. The reduced IO is invaluable at larger scales, for example with 1000 universities and `--consolidate Full` the compressed N-Triples output file is 706 MB while the uncompressed output is 23 GB i.e. an approximately 32x compression ratio.
@@ -68,8 +73,8 @@ Produces the follow performance numbers (on a quad core system with 4GB JVM Heap
 
 Disk | `--compress` | Time           | Total File Sizes (Approx.)
 ------ | ----------------- | --------------- | -----------
-SSD | No                 | 171s          | 24 GB
-SSD | Yes                |  216s         | 730 MB
+SSD | No                 | 188s          | 24 GB
+SSD | Yes                |  233s         | 730 MB
 HDD | No                | 343s           | 24 GB
 HDD | Yes               | 392s           | 730 MB
 
@@ -83,12 +88,23 @@ Produces the follow performance numbers (on a quad core system with 4GB JVM Heap
 
 Disk | `--compress` | Time           | Total File Sizes (Approx.)
 ------ | ----------------- | --------------- | -----------
-SSD | No                 | 134s          | 24 GB
-SSD | Yes                | 262s          | 730 MB
+SSD | No                 | 147s          | 24 GB
+SSD | Yes                | 296s          | 730 MB
 HDD | No                | 427s           | 24 GB
 HDD | Yes               | 407s           | 730 MB
 
 Enabling compression increases overall time taken by roughly 100% on an SSD but leaves it about the same with an HDD.
+
+For example generating data like so:
+
+    > ./generate.sh --quiet --timing -u 1000 --format NTRIPLES  --consolidate Maximal --threads 8
+
+Produces the follow performance numbers (on a quad core system with 4GB JVM Heap):
+
+Disk | `--compress` | Time           | Total File Sizes (Approx.)
+------ | ----------------- | --------------- | -----------
+SSD | No                 | 156s          | 24 GB
+SSD | Yes                | 379s          | 706 MB
 
 Remember that you can use the `--output` option to specify where the data files are generated and thus control what kind of disk the data is written to, if you fail to specify this then files are generated in your working directory i.e. where you launched the generator from.
 
