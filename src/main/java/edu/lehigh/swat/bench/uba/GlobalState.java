@@ -81,14 +81,15 @@ public class GlobalState {
             this.executorService = Executors.newFixedThreadPool(threads);
         }
 
-        // Adjust consolidation mode if Maximal is specified
+        // Adjust consolidation mode if Maximal/Full is specified
         if (consolidate == ConsolidationMode.Maximal) {
             switch (this.writerType) {
             case GRAPHML:
             case GRAPHML_NODESFIRST:
             case JSON:
             case NEO4J_GRAPHML:
-                // All these formats will maximally consolidate regardless, using
+                // All these formats will maximally consolidate regardless,
+                // using
                 // Partial should give the best IO balance
                 this.consolidate = ConsolidationMode.Partial;
                 break;
@@ -102,6 +103,20 @@ public class GlobalState {
             default:
                 // Otherwise default to full
                 this.consolidate = ConsolidationMode.Full;
+                break;
+            }
+        } else if (consolidate == ConsolidationMode.Full) {
+            switch (this.writerType) {
+            case GRAPHML:
+            case GRAPHML_NODESFIRST:
+            case JSON:
+            case NEO4J_GRAPHML:
+                // All these formats need us to use Partial consolidation as the
+                // primary consolidation
+                this.consolidate = ConsolidationMode.Partial;
+                break;
+            default:
+                this.consolidate = consolidate;
                 break;
             }
         } else {
