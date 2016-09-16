@@ -9,5 +9,5 @@ public class GraphMLVocabulary {
     public static final String GRAPH_START = "  <graph id=\"LUBM\" edgedefault=\"directed\">";
     public static final String GRAPH_END = "  </graph>";
     public static final boolean[] IS_NODE_ATTRIBUTE = { true, false, false, false, false, false, false, false, false,
-            false, false, false, true, true, false, false };
+            false, false, true, true, true, false, false };
 }
