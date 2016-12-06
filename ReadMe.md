@@ -26,7 +26,21 @@ Data Generator for the LUBM Benchmark, this is the original code for the generat
      - Use OS specific filename separator character
      - Check for errors when writing files
 
+## Building
+
+You will need a Java 7 JDK available on the build system.
+
+We use [Apache Maven](http://maven.apache.org) as the build tool. You will need Maven 3.x installed in order to build, Maven 3.3.0 or higher is recommended or higher is recommended. Please note that Maven automatically downloads the required build tools and dependencies from the Internet so you will need an Internet connection to build.
+
+The build artefacts are portable so you can build on one system and then simply copy `generate.sh` and the `target` directory across to the system where you will run the generator.
+
+Assuming all prerequisites are met the following will build the generator:
+
+    > mvn clean install
+
 ## Usage
+
+You'll need a Java 7 JRE available on the system.
 
     > ./generate.sh options
    
