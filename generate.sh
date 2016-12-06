@@ -23,4 +23,4 @@ if [ ! -e "${SCRIPT_DIR}/target/lubm-uba.jar" ]; then
 fi
 
 # Exec the Java class
-exec java ${JAVA_OPTS} -jar "${SCRIPT_DIR}/target/lubm-uba.jar" $*
+exec java ${JAVA_OPTS} -jar "${SCRIPT_DIR}/target/lubm-uba.jar" "$@"
