@@ -3,6 +3,7 @@ package edu.lehigh.swat.bench.uba;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
 class UniversityGenerator implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(UniversityGenerator.class);
 
+    private static AtomicBoolean abortMessageShown = new AtomicBoolean(false);
+
     private final UniversityState univState;
 
     public UniversityGenerator(UniversityState univState) {
@@ -26,10 +29,13 @@ class UniversityGenerator implements Runnable {
 
     public void run() {
         if (!this.univState.getGlobalState().shouldContinue()) {
-            LOGGER.error("Some data generators have failed, skipping further data generation (University {})", this.univState.getUniversityIndex());
+            // Only show the abort message once
+            if (!abortMessageShown.getAndSet(true)) {
+                LOGGER.error("Some data generators have failed, skipping further data generation");
+            }
             return;
         }
-        
+
         try {
             this.univState.prepare();
             _generateUniv(this.univState);
