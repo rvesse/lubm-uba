@@ -143,6 +143,10 @@ Yuanbo Guo	[yug2@lehigh.edu](mailto:yug2@lehigh.edu)
 
 For more information about the benchmark, visit its [homepage](http://www.lehigh.edu/~yug2/Research/SemanticWeb/LUBM/LUBM.htm)
 
+### Related Work
+
+GraphML extensions based upon work from https://github.com/ssrangan/GraphBench by Rangan Sukumar but adapted for parallel data generation.
+
 ### This Repository
 
 You can file issues against this repository if they are specific to this version of the data generator.  While the generator here differs substantially from the original **all** changes have been implemented such that the data generated remains identical.
