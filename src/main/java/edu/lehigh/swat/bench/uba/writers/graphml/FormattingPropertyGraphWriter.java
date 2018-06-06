@@ -21,6 +21,15 @@ public abstract class FormattingPropertyGraphWriter extends PropertyGraphWriter 
         super.startFile(fileName, state);
         this.formatter.newFile();
     }
+    
+    @Override
+    public void flushFile(GlobalState state) {
+        if (this.getNodeOutput() != null)
+            this.getNodeOutput().flush();
+        
+        if (this.getEdgeOutput() != null)
+            this.getEdgeOutput().flush();
+    }
 
     @Override
     protected void writeNode(Node n) {

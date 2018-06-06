@@ -13,8 +13,10 @@ import java.util.zip.GZIPOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.GlobalState;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
+import edu.lehigh.swat.bench.uba.writers.Writer;
 
 /**
  * Provides a pool of thread-scoped writers so each worker thread can write to a
@@ -26,7 +28,7 @@ import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
  * @author rvesse
  *
  */
-public class WriterPool {
+public class WriterPool implements GeneratorCallbackTarget {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WriterPool.class);
 
@@ -124,6 +126,12 @@ public class WriterPool {
         synchronized (this.writers) {
             for (int i = 0; i < this.writers.size(); i++) {
                 OutputStream output = this.writers.get(i);
+
+                // Want to ensure the files are ended appropriately
+                Writer writer = this.state.createWriter(this);
+                writer.endFile(this.state, output);
+
+                // Flush and close the file
                 String filename = this.filenames.get(i);
                 try {
                     output.flush();
@@ -147,5 +155,29 @@ public class WriterPool {
         if (!errors.isEmpty())
             throw new IllegalStateException(
                     String.format("%d writers from the writer pool could not be closed", errors.size()));
+    }
+
+    @Override
+    public void startSectionCB(int classType) {
+        // No-op, at the point where we are used as a generator target we will
+        // never be called back to anyway
+    }
+
+    @Override
+    public void startAboutSectionCB(int classType) {
+        // No-op, at the point where we are used as a generator target we will
+        // never be called back to anyway
+    }
+
+    @Override
+    public void addPropertyCB(int property) {
+        // No-op, at the point where we are used as a generator target we will
+        // never be called back to anyway
+    }
+
+    @Override
+    public void addValueClassCB(int classType) {
+        // No-op, at the point where we are used as a generator target we will
+        // never be called back to anyway
     }
 }

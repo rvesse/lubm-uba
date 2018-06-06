@@ -19,6 +19,8 @@
 
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.io.OutputStream;
+
 import edu.lehigh.swat.bench.uba.GlobalState;
 
 public interface Writer {
@@ -34,12 +36,31 @@ public interface Writer {
     public void startFile(String fileName, GlobalState state);
 
     /**
+     * Flushes the current file
+     * 
+     * @param state
+     *            Global state
+     */
+    public void flushFile(GlobalState state);
+
+    /**
      * Finishes the current file.
      * 
      * @param state
      *            Global state
      */
     public void endFile(GlobalState state);
+
+    /**
+     * Ends the provided file, this is only called when using
+     * {@link ConsolidationMode#Full}
+     * 
+     * @param state
+     *            Global state
+     * @param output
+     *            Output
+     */
+    public void endFile(GlobalState state, OutputStream output);
 
     /**
      * Starts a section for the specified instance.

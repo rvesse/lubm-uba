@@ -10,10 +10,18 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
+import edu.lehigh.swat.bench.uba.writers.DamlWriter;
+import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
+import edu.lehigh.swat.bench.uba.writers.OwlWriter;
+import edu.lehigh.swat.bench.uba.writers.TurtleWriter;
+import edu.lehigh.swat.bench.uba.writers.Writer;
 import edu.lehigh.swat.bench.uba.writers.WriterType;
 import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLConsolidator;
 import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLNodesThenEdgesConsolidator;
+import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLWriter;
+import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.SegregatedGraphMLWriter;
 import edu.lehigh.swat.bench.uba.writers.pgraph.json.JsonConsolidator;
+import edu.lehigh.swat.bench.uba.writers.pgraph.json.JsonWriter;
 import edu.lehigh.swat.bench.uba.writers.utils.SingleFileConsolidator;
 import edu.lehigh.swat.bench.uba.writers.utils.WriteConsolidator;
 import edu.lehigh.swat.bench.uba.writers.utils.WriterPool;
@@ -89,8 +97,7 @@ public class GlobalState {
             case JSON:
             case NEO4J_GRAPHML:
                 // All these formats will maximally consolidate regardless,
-                // using
-                // Partial should give the best IO balance
+                // using Partial should give the best IO balance
                 this.consolidate = ConsolidationMode.Partial;
                 break;
             case NTRIPLES:
@@ -269,6 +276,44 @@ public class GlobalState {
         }
     }
 
+    /**
+     * Creates a new writer
+     * 
+     * @param callbackTarget
+     *            Callback target
+     * @return Writer
+     */
+    public Writer createWriter(GeneratorCallbackTarget callbackTarget) {
+        switch (this.getWriterType()) {
+        case OWL:
+            return new OwlWriter(callbackTarget, this.getOntologyUrl());
+
+        case DAML:
+            return new DamlWriter(callbackTarget, this.getOntologyUrl());
+
+        case NTRIPLES:
+            return new NTriplesWriter(callbackTarget, this.getOntologyUrl());
+
+        case TURTLE:
+            return new TurtleWriter(callbackTarget, this.getOntologyUrl());
+
+        case GRAPHML:
+            return new GraphMLWriter(callbackTarget, false);
+
+        case GRAPHML_NODESFIRST:
+            return new SegregatedGraphMLWriter(callbackTarget, false);
+
+        case NEO4J_GRAPHML:
+            return new SegregatedGraphMLWriter(callbackTarget, true);
+
+        case JSON:
+            return new JsonWriter(callbackTarget);
+
+        default:
+            throw new RuntimeException("Invalid writer type specified");
+        }
+    }
+
     public WriterPool getWriterPool() {
         return this.writerPool;
     }
@@ -278,7 +323,6 @@ public class GlobalState {
     }
 
     public void start() {
-
         if (this.writeConsolidator != null) {
             this.consolidatorFuture = this.consolidatorService.submit(this.writeConsolidator);
             while (!this.writeConsolidator.wasStarted()) {

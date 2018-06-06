@@ -26,7 +26,7 @@ public class SegregatedFormattingPropertyGraphWriter extends FormattingPropertyG
         
         this.formatter.newFile();
     }
-    
+        
     @Override
     protected PrintStream getEdgeOutput() {
         return this.edgeOut;

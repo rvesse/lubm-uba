@@ -17,6 +17,7 @@ import edu.lehigh.swat.bench.uba.GlobalState;
 public class MemoryBufferedOutputStream extends FilterOutputStream {
 
     private final GlobalState state;
+    private final Object lock = new Object();
 
     public MemoryBufferedOutputStream(GlobalState state) {
         super(new ByteArrayOutputStream(BufferSizes.MEMORY_BUFFER_SIZE));
@@ -24,13 +25,35 @@ public class MemoryBufferedOutputStream extends FilterOutputStream {
     }
 
     @Override
+    public void flush() throws IOException {
+        super.flush();
+
+        synchronized (this.lock) {
+            // Nothing to do if the buffer is empty
+            if (this.out == null)
+                return;
+
+            // Flush the current state of the output stream
+            OutputStream output = this.state.getWriterPool().getOutputStream();
+            output.write(((ByteArrayOutputStream) this.out).toByteArray());
+            output.flush();
+
+            // Reset the buffer after a flush
+            this.out = null;
+            this.out = new ByteArrayOutputStream(BufferSizes.MEMORY_BUFFER_SIZE);
+        }
+    }
+
+    @Override
     public void close() throws IOException {
         super.close();
 
-        // Submit the write to the background writer service
-        OutputStream output = this.state.getWriterPool().getOutputStream();
-        output.write(((ByteArrayOutputStream) this.out).toByteArray());
-        output.flush();
-        this.out = null;
+        synchronized (this.lock) {
+            // Submit the write to the background writer service
+            OutputStream output = this.state.getWriterPool().getOutputStream();
+            output.write(((ByteArrayOutputStream) this.out).toByteArray());
+            output.flush();
+            this.out = null;
+        }
     }
 }

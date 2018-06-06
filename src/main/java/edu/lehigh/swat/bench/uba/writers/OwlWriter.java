@@ -40,6 +40,7 @@ public class OwlWriter extends RdfWriter {
      */
     void writeHeader() {
         String s;
+        // TODO Use out.format() instead
         s = "xmlns:" + WriterVocabulary.T_RDF_NS + "=\"" + WriterVocabulary.T_RDF_NS_URI + "\"";
         out.println(s);
         s = "xmlns:" + WriterVocabulary.T_RDFS_NS + "=\"" + WriterVocabulary.T_RDFS_NS_URI + "\"";
