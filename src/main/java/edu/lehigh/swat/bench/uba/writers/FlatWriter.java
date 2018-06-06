@@ -1,5 +1,6 @@
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.io.OutputStream;
 import java.util.Stack;
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
@@ -25,6 +26,12 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
         this.out = prepareOutputStream(fileName, state);
         addOntologyDeclaration();
     }
+    
+    @Override
+    public void flushFile(GlobalState state) {
+        if (this.out != null)
+            this.out.flush();
+    }
 
     protected void addOntologyDeclaration() {
         // Add Ontology declaration
@@ -44,7 +51,11 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
         } finally {
             this.out = null;
         }
-
+    }
+    
+    @Override
+    public void endFile(GlobalState state, OutputStream output) {
+        // No-op
     }
 
     protected String getCurrentSubject() {

@@ -19,6 +19,8 @@
 
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.io.OutputStream;
+
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.GlobalState;
 import edu.lehigh.swat.bench.uba.model.Ontology;
@@ -34,31 +36,29 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         super(callbackTarget);
     }
 
-    /**
-     * Implementation of Writer:startFile.
-     */
+    @Override
     public void startFile(String fileName, GlobalState state) {
-        String s;
         this.out = prepareOutputStream(fileName, state);
 
         // XML header
-        s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
-        out.println(s);
+        out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 
         // Root rdf:RDF element
-        s = "<" + WriterVocabulary.T_RDF_PREFIX + "RDF";
-        out.println(s);
+        out.format("<%sRDF", WriterVocabulary.T_RDF_PREFIX);
+        out.println();
         writeHeader();
 
     }
+    
+    @Override
+    public void flushFile(GlobalState state) {
+        if (this.out != null)
+            this.out.flush();
+    }
 
-    /**
-     * Implementation of Writer:endFile.
-     */
+    @Override
     public void endFile(GlobalState state) {
-        String s;
-        s = "</" + WriterVocabulary.T_RDF_PREFIX + "RDF>";
-        out.println(s);
+        endFile(state, this.out);
 
         try {
             cleanupOutputStream(this.out);
@@ -68,10 +68,14 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         
         this.submitWrites();
     }
+    
+    @Override
+    public void endFile(GlobalState state, OutputStream output) {
+        out.format("</%sRDF>", WriterVocabulary.T_RDF_PREFIX);
+        out.println();
+    }
 
-    /**
-     * Implementation of Writer:startSection.
-     */
+    @Override
     public void startSection(int classType, String id) {
         callbackTarget.startSectionCB(classType);
         out.println();
@@ -80,9 +84,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:startAboutSection.
-     */
+    @Override
     public void startAboutSection(int classType, String id) {
         callbackTarget.startAboutSectionCB(classType);
         out.println();
@@ -91,17 +93,13 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:endSection.
-     */
+    @Override
     public void endSection(int classType) {
         String s = "</" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + ">";
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:addProperty.
-     */
+    @Override
     public void addProperty(int property, String value, boolean isResource) {
         callbackTarget.addPropertyCB(property);
 
@@ -117,9 +115,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:addProperty.
-     */
+    @Override
     public void addProperty(int property, int valueClass, String valueId) {
         callbackTarget.addPropertyCB(property);
         callbackTarget.addValueClassCB(valueClass);

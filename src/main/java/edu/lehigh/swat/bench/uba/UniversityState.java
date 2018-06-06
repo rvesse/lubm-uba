@@ -10,14 +10,7 @@ import edu.lehigh.swat.bench.uba.model.Ontology;
 import edu.lehigh.swat.bench.uba.model.PropertyCount;
 import edu.lehigh.swat.bench.uba.model.PublicationInfo;
 import edu.lehigh.swat.bench.uba.writers.ConsolidationMode;
-import edu.lehigh.swat.bench.uba.writers.DamlWriter;
-import edu.lehigh.swat.bench.uba.writers.NTriplesWriter;
-import edu.lehigh.swat.bench.uba.writers.OwlWriter;
-import edu.lehigh.swat.bench.uba.writers.TurtleWriter;
 import edu.lehigh.swat.bench.uba.writers.Writer;
-import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.GraphMLWriter;
-import edu.lehigh.swat.bench.uba.writers.pgraph.graphml.SegregatedGraphMLWriter;
-import edu.lehigh.swat.bench.uba.writers.pgraph.json.JsonWriter;
 
 public class UniversityState implements GeneratorCallbackTarget {
 
@@ -95,34 +88,7 @@ public class UniversityState implements GeneratorCallbackTarget {
         remainingGradCourses = new ArrayList<Integer>();
         publications = new ArrayList<PublicationInfo>();
 
-        switch (state.getWriterType()) {
-        case OWL:
-            writer = new OwlWriter(this, state.getOntologyUrl());
-            break;
-        case DAML:
-            writer = new DamlWriter(this, state.getOntologyUrl());
-            break;
-        case NTRIPLES:
-            writer = new NTriplesWriter(this, state.getOntologyUrl());
-            break;
-        case TURTLE:
-            writer = new TurtleWriter(this, state.getOntologyUrl());
-            break;
-        case GRAPHML:
-            writer = new GraphMLWriter(this, false);
-            break;
-        case GRAPHML_NODESFIRST:
-            writer = new SegregatedGraphMLWriter(this, false);
-            break;
-        case NEO4J_GRAPHML:
-            writer = new SegregatedGraphMLWriter(this, true);
-            break;
-        case JSON:
-            writer = new JsonWriter(this);
-            break;
-        default:
-            throw new RuntimeException("Invalid writer type specified");
-        }
+        writer = state.createWriter(this);
     }
 
     public boolean hasCompleted() {

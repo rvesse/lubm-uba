@@ -126,6 +126,8 @@ class UniversityGenerator implements Runnable {
                 System.out.println(filename + " generated");
             } else {
                 // Full Consolidation so output file is not yet complete
+                // However we should flush what we have generated to reduce our memory usage
+                univState.getWriter().flushFile(univState.getGlobalState());
                 System.out.println(filename + " (University " + univState.getUniversityIndex() + ") in progress...");
             }
 
