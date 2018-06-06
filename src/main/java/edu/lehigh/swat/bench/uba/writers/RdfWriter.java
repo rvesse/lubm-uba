@@ -20,10 +20,7 @@
 package edu.lehigh.swat.bench.uba.writers;
 
 import java.io.OutputStream;
-<<<<<<< HEAD
-=======
 import java.io.PrintStream;
->>>>>>> e2bda70
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.GlobalState;
