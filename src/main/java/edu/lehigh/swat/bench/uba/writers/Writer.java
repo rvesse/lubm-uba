@@ -34,6 +34,14 @@ public interface Writer {
     public void startFile(String fileName, GlobalState state);
 
     /**
+     * Flushes the current file
+     * 
+     * @param state
+     *            Global state
+     */
+    public void flushFile(GlobalState state);
+
+    /**
      * Finishes the current file.
      * 
      * @param state

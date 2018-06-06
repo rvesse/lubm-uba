@@ -34,9 +34,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         super(callbackTarget);
     }
 
-    /**
-     * Implementation of Writer:startFile.
-     */
+    @Override
     public void startFile(String fileName, GlobalState state) {
         String s;
         this.out = prepareOutputStream(fileName, state);
@@ -51,10 +49,14 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         writeHeader();
 
     }
+    
+    @Override
+    public void flushFile(GlobalState state) {
+        if (this.out != null)
+            this.out.flush();
+    }
 
-    /**
-     * Implementation of Writer:endFile.
-     */
+    @Override
     public void endFile(GlobalState state) {
         String s;
         s = "</" + WriterVocabulary.T_RDF_PREFIX + "RDF>";
@@ -69,9 +71,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         this.submitWrites();
     }
 
-    /**
-     * Implementation of Writer:startSection.
-     */
+    @Override
     public void startSection(int classType, String id) {
         callbackTarget.startSectionCB(classType);
         out.println();
@@ -80,9 +80,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:startAboutSection.
-     */
+    @Override
     public void startAboutSection(int classType, String id) {
         callbackTarget.startAboutSectionCB(classType);
         out.println();
@@ -91,17 +89,13 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:endSection.
-     */
+    @Override
     public void endSection(int classType) {
         String s = "</" + WriterVocabulary.T_ONTO_PREFIX + Ontology.CLASS_TOKEN[classType] + ">";
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:addProperty.
-     */
+    @Override
     public void addProperty(int property, String value, boolean isResource) {
         callbackTarget.addPropertyCB(property);
 
@@ -117,9 +111,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         out.println(s);
     }
 
-    /**
-     * Implementation of Writer:addProperty.
-     */
+    @Override
     public void addProperty(int property, int valueClass, String valueId) {
         callbackTarget.addPropertyCB(property);
         callbackTarget.addValueClassCB(valueClass);
