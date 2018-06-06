@@ -61,7 +61,7 @@ verifyTool riot "yes"
 NUM="${1:-10}"
 ONTO_URL="http://www.lehigh.edu/~zhp2/2004/0401/univ-bench.owl"
 
-set -e
+
 
 # Use the original code to generate data
 git checkout master
@@ -121,7 +121,7 @@ do
   EXT=$(ext "${FORMAT}")
   LANG=$(lang "${FORMAT}")
 
-  set -e
+  
 
   ST_BASE="${BASE}improved/single-threaded"
   createTempDir "${ST_BASE}"
@@ -145,7 +145,7 @@ do
   rm -f ${CON_SOME_BASE}/${FORMAT}/*_orig.nt
   ./generate.sh --univ ${NUM} --output ${CON_FULL_BASE}/${FORMAT} --threads 8 --onto "${ONTO_URL}" --format ${FORMAT} --timing --quiet --consolidate Full
 
-  set +e
+  
 
   # Check outputs
   for FILE in $(ls ${ORIG_BASE}/*.owl);
@@ -182,11 +182,18 @@ do
     fi
 
     # Prepare the concatenated output for testing
-    set -e
+    
     CONSOLIDATED_FILE="${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt"
     if [ ! -e "${CONSOLIDATED_FILE}" ]; then
-      riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/${OUT_NAME}_* > "${CONSOLIDATED_FILE}"
-      set +e
+      rm errors.txt
+      riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/${OUT_NAME}_* > "${CONSOLIDATED_FILE}" 2> errors.txt
+      grep "ERROR" errors.txt >/dev/null
+      if [ $? -eq 0 ]; then
+        echo "RIOT failed to parse ${ORIG_BASE}/${OUT_NAME}_* original data files"
+        cat errors.txt
+        echo "riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/${OUT_NAME}_* > ${CONSOLIDATED_FILE}"
+        exit 1
+      fi
 
       rdfdiff "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}_orig.nt" "${CON_SOME_BASE}/${FORMAT}/${OUT_NAME}${EXT}" N3 ${LANG} http://example.org/ http://example.org/
       if [ $? -ne 0 ]; then
@@ -195,12 +202,28 @@ do
         exit 1
       fi
     fi
-    set -e
+    
     CONSOLIDATED_FILE="${CON_FULL_BASE}/${FORMAT}/Universities_orig.nt"
     if [ ! -e "${CONSOLIDATED_FILE}" ]; then
-      riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/* > "${CONSOLIDATED_FILE}"
-      riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt"
-      set +e
+      rm errors.txt
+      riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/* > "${CONSOLIDATED_FILE}" 2> errors.txt
+      grep "ERROR" errors.txt >/dev/null
+      if [ $? -eq 0 ]; then
+        echo "RIOT failed to parse ${ORIG_BASE}/* consolidated data files"
+        cat errors.txt
+        echo "riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${ORIG_BASE}/* > ${CONSOLIDATED_FILE}"
+        exit 1
+      fi
+      rm errors.txt
+      riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt" 2> errors.txt
+      grep "ERROR" errors.txt >/dev/null
+      if [ $? -eq 0 ]; then
+        echo "RIOT failed to parse ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} consolidated data files"
+        cat errors.txt
+        echo "riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > ${CON_FULL_BASE}/${FORMAT}/Universities_full.nt"
+        exit 1
+      fi
+      rm errors.txt
 
       rdfdiff "${CONSOLIDATED_FILE}" "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt" N3 N3 http://example.org/ http://example.org/
       if [ $? -ne 0 ]; then
@@ -220,7 +243,7 @@ do
   rm -f "${CON_FULL_BASE}/${FORMAT}/*${EXT}"
 done
 
-set +e
+
 
 echo "All output formats were OK"
 rm -f /tmp/lubm/orig/*.owl
