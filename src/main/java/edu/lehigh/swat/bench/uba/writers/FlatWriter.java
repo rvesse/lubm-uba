@@ -25,6 +25,12 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
         this.out = prepareOutputStream(fileName, state);
         addOntologyDeclaration();
     }
+    
+    @Override
+    public void flushFile(GlobalState state) {
+        if (this.out != null)
+            this.out.flush();
+    }
 
     protected void addOntologyDeclaration() {
         // Add Ontology declaration

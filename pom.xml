@@ -109,6 +109,18 @@
               <mainClass>edu.lehigh.swat.bench.uba.Launcher</mainClass>
             </transformer>
           </transformers>
+          <!-- Workaround from http://stackoverflow.com/questions/999489/invalid-signature-file-when-attempting-to-run-a-jar -->
+          <filters>
+            <filter>
+              <artifact>*:*</artifact>
+              <excludes>
+                <exclude>META-INF/*.SF</exclude>
+                <exclude>META-INF/*.DSA</exclude>
+                <exclude>META-INF/*.RSA</exclude>
+                <exclude>log4j.properties</exclude>
+              </excludes>
+            </filter>
+          </filters>
         </configuration>
         <executions>
           <execution>
