@@ -9,6 +9,7 @@ dependency-reduced-pom.xml
 
 # Generator Artifacts
 log.txt
+errors.txt
 Universities.*
 Universities-*
 *.log

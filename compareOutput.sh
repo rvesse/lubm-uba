@@ -215,12 +215,12 @@ do
         exit 1
       fi
       rm errors.txt
-      riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt" 2> errors.txt
+      riot --quiet --stream=N-TRIPLE --syntax=${LANG} --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > "${CON_FULL_BASE}/${FORMAT}/Universities_full.nt" 2> errors.txt
       grep "ERROR" errors.txt >/dev/null
       if [ $? -eq 0 ]; then
         echo "RIOT failed to parse ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} consolidated data files"
         cat errors.txt
-        echo "riot --quiet --stream=N-TRIPLE --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > ${CON_FULL_BASE}/${FORMAT}/Universities_full.nt"
+        echo "riot --quiet --stream=N-TRIPLE --syntax=${LANG} --base=http://example.org/ ${CON_FULL_BASE}/${FORMAT}/Universities-*${EXT} > ${CON_FULL_BASE}/${FORMAT}/Universities_full.nt"
         exit 1
       fi
       rm errors.txt
