@@ -25,6 +25,7 @@
  */
 package edu.lehigh.swat.bench.uba.writers.graphml;
 
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -68,6 +69,12 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
         } finally {
             this.out = null;
         }
+    }
+
+    @Override
+    public void endFile(GlobalState state, OutputStream output) {
+        throw new UnsupportedOperationException(
+                "Full consolidation is not directly supported by property graph writers");
     }
 
     protected abstract void writeNode(Node n);

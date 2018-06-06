@@ -19,6 +19,8 @@
 
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.io.OutputStream;
+
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.GlobalState;
 import edu.lehigh.swat.bench.uba.model.Ontology;
@@ -36,16 +38,14 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
 
     @Override
     public void startFile(String fileName, GlobalState state) {
-        String s;
         this.out = prepareOutputStream(fileName, state);
 
         // XML header
-        s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>";
-        out.println(s);
+        out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 
         // Root rdf:RDF element
-        s = "<" + WriterVocabulary.T_RDF_PREFIX + "RDF";
-        out.println(s);
+        out.format("<%sRDF", WriterVocabulary.T_RDF_PREFIX);
+        out.println();
         writeHeader();
 
     }
@@ -58,9 +58,7 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
 
     @Override
     public void endFile(GlobalState state) {
-        String s;
-        s = "</" + WriterVocabulary.T_RDF_PREFIX + "RDF>";
-        out.println(s);
+        endFile(state, this.out);
 
         try {
             cleanupOutputStream(this.out);
@@ -69,6 +67,12 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         }
         
         this.submitWrites();
+    }
+    
+    @Override
+    public void endFile(GlobalState state, OutputStream output) {
+        out.format("</%sRDF>", WriterVocabulary.T_RDF_PREFIX);
+        out.println();
     }
 
     @Override
