@@ -121,12 +121,14 @@ class UniversityGenerator implements Runnable {
         if (univState.getGlobalState().consolidationMode() == ConsolidationMode.None
                 || index == univState.getInstances()[Ontology.CS_C_DEPT].num - 1) {
             if (univState.getGlobalState().consolidationMode() != ConsolidationMode.Full) {
+                // None or Partial consolidation, we are done with this file
+                univState.getWriter().endFile(univState.getGlobalState());
                 System.out.println(filename + " generated");
             } else {
-                // Consolidating output so file is not yet complete
+                // Full Consolidation so output file is not yet complete
                 System.out.println(filename + " (University " + univState.getUniversityIndex() + ") in progress...");
             }
-            univState.getWriter().endFile(univState.getGlobalState());
+
         }
     }
 
