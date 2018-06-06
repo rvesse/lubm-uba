@@ -20,6 +20,10 @@
 package edu.lehigh.swat.bench.uba.writers;
 
 import java.io.OutputStream;
+<<<<<<< HEAD
+=======
+import java.io.PrintStream;
+>>>>>>> e2bda70
 
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 import edu.lehigh.swat.bench.uba.GlobalState;
@@ -71,8 +75,10 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     
     @Override
     public void endFile(GlobalState state, OutputStream output) {
-        out.format("</%sRDF>", WriterVocabulary.T_RDF_PREFIX);
-        out.println();
+        PrintStream print = new PrintStream(output);
+        print.format("</%sRDF>", WriterVocabulary.T_RDF_PREFIX);
+        print.println();
+        print.flush();
     }
 
     @Override
