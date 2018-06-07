@@ -1,5 +1,7 @@
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,6 +33,18 @@ public class TurtleWriter extends FlatWriter {
         }
 
         addOntologyDeclaration();
+    }
+    
+    @Override
+    public void endFile(GlobalState state, OutputStream output) {
+        if (lastSubject != null) {
+            PrintStream print = new PrintStream(output);
+            print.println('.');
+            lastSubject = null;
+            print.flush();
+        }
+        
+        super.endFile(state, output);
     }
 
     @Override
