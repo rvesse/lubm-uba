@@ -36,6 +36,17 @@ public interface Writer {
     public void startFile(String fileName, GlobalState state);
 
     /**
+     * Starts the provided file, this is only called when using
+     * {@link ConsolidationMode#Full}
+     * 
+     * @param state
+     *            Global state
+     * @param output
+     *            Output
+     */
+    public void startFile(GlobalState state, OutputStream output);
+    
+    /**
      * Flushes the current file
      * 
      * @param state

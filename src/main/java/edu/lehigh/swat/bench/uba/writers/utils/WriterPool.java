@@ -80,6 +80,11 @@ public class WriterPool implements GeneratorCallbackTarget {
             if (this.state.compressFiles()) {
                 output = new GZIPOutputStream(output, BufferSizes.GZIP_BUFFER_SIZE);
             }
+            
+            // Start the file
+            Writer writer = state.createWriter(this);
+            writer.startFile(state, output);
+            output.flush();
 
             // Record this writer so we can re-use it on this thread later and
             // so we can clean it up from a different thread

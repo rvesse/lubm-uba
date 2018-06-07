@@ -41,16 +41,31 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     public void startFile(String fileName, GlobalState state) {
         this.out = prepareOutputStream(fileName, state);
 
+        // WriterPool takes care of this for full consolidation
+        // by calling the other overload of startFile()
+        if (state.consolidationMode() == ConsolidationMode.Full)
+            return;
+
+        outputXmlHeader(this.out);
+    }
+    
+    @Override
+    public void startFile(GlobalState state, OutputStream output) {
+        PrintStream print = new PrintStream(output);
+        outputXmlHeader(print);
+        print.flush();
+    }
+
+    protected void outputXmlHeader(PrintStream out) {
         // XML header
         out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>");
 
         // Root rdf:RDF element
         out.format("<%sRDF", WriterVocabulary.T_RDF_PREFIX);
         out.println();
-        writeHeader();
-
+        writeHeader(out);
     }
-    
+
     @Override
     public void flushFile(GlobalState state) {
         if (this.out != null)
@@ -66,10 +81,10 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
         } finally {
             this.out = null;
         }
-        
+
         this.submitWrites();
     }
-    
+
     @Override
     public void endFile(GlobalState state, OutputStream output) {
         PrintStream print = new PrintStream(output);
@@ -135,5 +150,5 @@ public abstract class RdfWriter extends AbstractWriter implements Writer {
     /**
      * Writes the header part.
      */
-    abstract void writeHeader();
+    protected abstract void writeHeader(PrintStream output);
 }

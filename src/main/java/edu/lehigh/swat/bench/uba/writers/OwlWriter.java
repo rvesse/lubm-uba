@@ -19,6 +19,8 @@
 
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.io.PrintStream;
+
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 
 public class OwlWriter extends RdfWriter {
@@ -38,7 +40,8 @@ public class OwlWriter extends RdfWriter {
     /**
      * Writes the header, including namespace declarations and ontology header.
      */
-    void writeHeader() {
+    @Override
+    protected void writeHeader(PrintStream out) {
         String s;
         // TODO Use out.format() instead
         s = "xmlns:" + WriterVocabulary.T_RDF_NS + "=\"" + WriterVocabulary.T_RDF_NS_URI + "\"";

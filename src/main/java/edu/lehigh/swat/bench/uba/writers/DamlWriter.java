@@ -19,6 +19,8 @@
 
 package edu.lehigh.swat.bench.uba.writers;
 
+import java.io.PrintStream;
+
 import edu.lehigh.swat.bench.uba.GeneratorCallbackTarget;
 
 public class DamlWriter extends RdfWriter {
@@ -39,7 +41,8 @@ public class DamlWriter extends RdfWriter {
      * Writes the header part, including namespace declarations and imports
      * statements.
      */
-    void writeHeader() {
+    @Override
+    protected void writeHeader(PrintStream out) {
         String s;
         s = "xmlns:" + WriterVocabulary.T_RDF_NS + "=\"" + WriterVocabulary.T_RDF_NS_URI + "\"";
         out.println(s);

@@ -26,7 +26,14 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
         this.out = prepareOutputStream(fileName, state);
         addOntologyDeclaration();
     }
-    
+
+    @Override
+    public void startFile(GlobalState state, OutputStream output) {
+        // No-op
+        // For flat file formats which are natively concatenatable calling
+        // startFile() multiple times won't matter
+    }
+
     @Override
     public void flushFile(GlobalState state) {
         if (this.out != null)
@@ -52,7 +59,7 @@ public abstract class FlatWriter extends AbstractWriter implements Writer {
             this.out = null;
         }
     }
-    
+
     @Override
     public void endFile(GlobalState state, OutputStream output) {
         // No-op

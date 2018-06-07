@@ -58,6 +58,12 @@ public abstract class PropertyGraphWriter extends AbstractWriter implements Writ
         this.out = prepareOutputStream(fileName, state);
         this.state = state;
     }
+    
+    @Override
+    public void startFile(GlobalState state, OutputStream output) {
+        throw new UnsupportedOperationException(
+                "Full consolidation is not directly supported by property graph writers");
+    }
 
     @Override
     public void endFile(GlobalState state) {
